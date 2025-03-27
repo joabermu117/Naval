@@ -1,11 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Batalla Naval - Inicio</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet">
 </head>
 <body>
-    
+    <div class="container">
+        <h1>Batalla Naval</h1>
+        <form id="startForm">
+            <div class="form-group">
+                <label for="playerName">Nombre del Jugador:</label>
+                <input type="text" id="playerName" required placeholder="Ingresa tu nombre" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="playerCountry">País:</label>
+                <div class="custom-select" id="customSelect">
+                    <div class="selected-option" id="selectedOption">
+                        <img id="selectedImg" src="https://flagsapi.com/US/flat/24.png" alt="Bandera">
+                        <span id="selectedText">Selecciona tu país</span>
+                    </div>
+                    <ul class="options" id="optionsList"></ul>
+                </div>
+                <select id="playerCountry" required style="display: none;"></select>
+            </div>
+            <button type="submit">Comenzar Juego</button>
+            <div class="loading" id="loadingIndicator">
+                Cargando...
+            </div>
+        </form>
+    </div>
+
+    <script src="js/script.js"></script>
 </body>
 </html>

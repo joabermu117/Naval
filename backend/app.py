@@ -5,6 +5,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
+os.makedirs("database", exist_ok=True)
 
 DB_FILE = "database/scores.json"
 COUNTRY_FILE = "database/countries.json"
