@@ -7,24 +7,32 @@
         "score": 100000,
         "country_code": "ae"
     },
-        "Aventurín": {
-            "score": 42,
-            "country_code": "es"
-        },
-        "Esteban": {
-            "score": 88,
-            "country_code": "eu"
-        },
-        "Nimblaria": {
-            "score": 64,
-            "country_code": "ch"
-        },
-        "Luminexio": {
-            "score": 91,
-            "country_code": "hk"
-        },
-        "Velocitera": {
-            "score": 37,
-            "country_code": "jp"
-        }
+    "Aventur\u00c3\u00adn": {
+        "score": 42,
+        "country_code": "es"
+    },
+    "Esteban": {
+        "score": 88,
+        "country_code": "br"
+    },
+    "Nimblaria": {
+        "score": 64,
+        "country_code": "ch"
+    },
+    "Luminexio": {
+        "score": 91,
+        "country_code": "hk"
+    },
+    "Velocitera": {
+        "score": 37,
+        "country_code": "jp"
+    },
+    "Felipe14": {
+        "score": 0,
+        "country_code": "SA"
+    },
+    "juan": {
+        "score": 0,
+        "country_code": "AF"
+    }
 }

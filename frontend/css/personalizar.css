@@ -1,0 +1,46 @@
+body {
+    background-color: #f4f6f9;
+}
+
+.game-board {
+    display: grid;
+    gap: 2px;
+    justify-content: center;
+}
+
+.board-cell {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.ship-selector .ship {
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.ship-selector .ship:hover {
+    background-color: #f0f0f0;
+}
+
+.ship-selector .ship.selected {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.rotate-horizontal {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+.rotate-vertical {
+    background-color: rgba(0, 0, 255, 0.2);
+}
+/* Estilo del track (barra de progreso) */
+#boardSizeRange::-webkit-slider-runnable-track {
+    background: #6d6d6d; /* Cambia el color de la barra */
+    height: 8px;
+    border-radius: 5px;
+}
