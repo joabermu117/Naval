@@ -110,28 +110,6 @@ const optionsList = document.getElementById("optionsList");
 const playerCountry = document.getElementById("playerCountry");
 const rankingModal = document.getElementById("rankingModal");
 
-rankingModal.addEventListener(e, () => {
-
+document.getElementById('btnOpenRanking').addEventListener('click', function() {
+    window.RankingModal.open();
 });
-
-// Cargar modal de ranking desde otro HTML
-function loadRankingModal() {
-    fetch('ranking.html')
-        .then(response => response.text())
-        .then(html => {
-            rankingModal.innerHTML = html;
-            // Inicializar el modal de Bootstrap
-            new bootstrap.Modal(rankingModal);
-            // Cargar datos del ranking
-            cargarRanking()
-        })
-        .catch(error => {
-            console.error('Error al cargar el modal:', error);
-            rankingModal.querySelector('.modal-body').innerHTML = 
-                '<div class="alert alert-danger">Error al cargar el ranking</div>';
-        });
-}
-
-
-// Cargar modal cuando se haga clic en el botón
-document.querySelector('.btn-ranking').addEventListener('click', loadRankingModal);
