@@ -1,103 +1,110 @@
 // Variable para almacenar los datos del ranking
 let rankingData = {};
 
-// Función para obtener datos del backend (del primer código)
+// Función para obtener datos del backend
 async function fetchRankingData() {
     try {
-        const response = await fetch('http://localhost:5000/ranking');
+        const response = await fetch('http://127.0.0.1:5000/ranking'); // Reemplaza con tu endpoint
         console.log(response);
         
         if (!response.ok) {
             throw new Error('Error al obtener los datos del ranking');
         }
-        return await response.json();
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error('Error:', error);
         return {};
     }
 }
 
-// Función para renderizar el ranking (combinación de ambos)
+// Función para convertir los datos del backend a un array ordenado
+function prepareRankingData(data) {
+    return Object.values(data)
+        .map(user => ({ 
+            nickname: user.nickname ,// Usa el campo que corresponda
+            score: user.score || 0,
+            country_code: user.country_code || 'unknown'
+        }))
+        .sort((a, b) => b.score - a.score);
+}
+
+// Función para renderizar el ranking
 function renderRanking(data) {
     const rankingList = document.getElementById('rankingList');
-    const tablaRanking = document.getElementById('body-ranking');
+    rankingList.innerHTML = '';
     
-    // Determinar qué elemento usar
-    const targetElement = rankingList || tablaRanking;
-    if (!targetElement) {
-        console.error('No se encontró el elemento para mostrar el ranking');
-        return;
-    }
+    const sortedUsers = prepareRankingData(data);
     
-    // Limpiar contenido previo
-    targetElement.innerHTML = '';
+    // Mostrar máximo 10 resultados
+    const usersToShow = sortedUsers.slice(0, 10);
     
-    // Verificar si hay datos
-    if (!data || Object.keys(data).length === 0) {
-        targetElement.innerHTML = '<div class="no-results">No hay datos de ranking disponibles</div>';
-        return;
-    }
-    
-    // Crear tabla
-    const table = document.createElement('table');
-    table.className = 'table table-striped ranking-table';
-    
-    // Cabecera de la tabla
-    const thead = document.createElement('thead');
-    thead.innerHTML = `
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Jugador</th>
-            <th scope="col">Puntuación</th>
-            <th scope="col">País</th>
-        </tr>
-    `;
-    
-    // Cuerpo de la tabla
-    const tbody = document.createElement('tbody');
-    
-    // Procesar datos (del primer código con mejoras del segundo)
-    data.forEach((usuario, index) => {
-        const row = document.createElement('tr');
+    usersToShow.forEach((user, index) => {
+        const rankingItem = document.createElement('div');
+        rankingItem.className = 'ranking-item';
         
-        // Estilos especiales para los primeros puestos (del primer código)
-        if (index === 0) {
-            row.classList.add('table-warning');
-        } else if (index === 1) {
-            row.classList.add('table-secondary', 'text-white');
-        } else if (index === 2) {
-            row.classList.add('table-danger', 'text-white');
-        } else {
-            row.classList.add('bg-light');
-        }
+        // Puedes agregar un indicador de posición si lo deseas
+        const positionSpan = document.createElement('span');
+        positionSpan.className = 'player-position';
+        positionSpan.textContent = `${index + 1}.`;
         
-        // Usar nick_name del primer código o nickname del segundo
-        const nickname = usuario.nick_name || usuario.nickname;
-        const score = usuario.score;
-        const countryCode = (usuario.country_code || 'unknown').toUpperCase();
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+        nameSpan.textContent = user.name;
         
-        row.innerHTML = `
-            <th scope="row">${index + 1}</th>
-            <td>${nickname}</td>
-            <td>${score} pts</td>
-            <td>
-                <img src="https://flagsapi.com/${countryCode}/flat/24.png" 
-                     alt="${countryCode}" 
-                     class="country-flag"
-                     onerror="this.style.display='none'">
-            </td>
-        `;
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'player-score';
+        scoreSpan.textContent = `${user.score} pts`;
         
-        tbody.appendChild(row);
+        rankingItem.appendChild(positionSpan);
+        rankingItem.appendChild(nameSpan);
+        rankingItem.appendChild(scoreSpan);
+        rankingList.appendChild(rankingItem);
     });
+}
+
+// Funciones para manejar el modal
+async function openModal() {
+    const modal = document.getElementById('rankingModal');
     
-    table.appendChild(thead);
-    table.appendChild(tbody);
+    // Mostrar mensaje de carga
+    const rankingList = document.getElementById('rankingList');
+    rankingList.innerHTML = '<div class="loading">Cargando ranking...</div>';
     
-    // Insertar en el contenedor apropiado
-    if (rankingList) {
-        rankingList.appendChild(table);
-    } else {
-        targetElement.appendChild(table);
+    modal.style.display = 'flex';
+    
+    // Obtener datos actualizados
+    try {
+        const data = await fetchRankingData();
+        rankingData = data;
+        renderRanking(data);
+    } catch (error) {
+        rankingList.innerHTML = '<div class="error">Error al cargar el ranking</div>';
+        console.error('Error al abrir el modal:', error);
     }
 }
+
+function closeModal() {
+    const modal = document.getElementById('rankingModal');
+    modal.style.display = 'none';
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Cerrar modal al hacer clic en la X
+    document.querySelector('.close-modal').addEventListener('click', closeModal);
+    
+    // Cerrar modal al hacer clic fuera del contenido
+    document.getElementById('rankingModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('rankingModal')) {
+            closeModal();
+        }
+    });
+});
+
+// Exportar funciones para que puedan ser llamadas desde otros archivos
+window.RankingModal = {
+    open: openModal,
+    close: closeModal,
+    refresh: fetchRankingData // Opcional: para forzar actualización
+};
