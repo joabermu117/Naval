@@ -78,14 +78,25 @@ document.addEventListener("DOMContentLoaded", function () {
   
       const playerName = document.getElementById("playerName").value.trim();
       const countryCode = playerCountry.value;
-  
-      if (!playerName || !countryCode) {
+      const countryText = selectedText.textContent.trim();
+    
+      // Validación más estricta del país
+      if (!playerName || !countryCode || countryText === "Selecciona tu país") {
         alert("Por favor completa todos los campos");
+        // Resaltar los campos faltantes
+        if (!playerName) {
+          document.getElementById("playerName").classList.add("is-invalid");
+        }
+        if (!countryCode || countryText === "Selecciona tu país") {
+          selectedOption.classList.add("is-invalid");
+        }
         return;
       }
-  
+    
+      // Resto de la validación...
       if (playerName.length < 3) {
         alert("El nombre debe tener al menos 3 caracteres");
+        document.getElementById("playerName").classList.add("is-invalid");
         return;
       }
   

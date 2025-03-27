@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const temperatureInfo = document.getElementById('temperatureInfo');
     const conditionInfo = document.getElementById('conditionInfo');
     const startGameBtn = document.getElementById('startGameBtn');
+    displayPlayerInfo('playerInfoContainer');
 
     let currentBoardSize = 10;
     let selectedShip = null;
