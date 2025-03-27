@@ -7,7 +7,7 @@
         "score": 100000,
         "country_code": "ae"
     },
-    "Aventur\u00c3\u00adn": {
+    "Aventuran": {
         "score": 42,
         "country_code": "es"
     },
@@ -38,5 +38,9 @@
     "deyutry": {
         "score": 0,
         "country_code": "AX"
+    },
+    "juan": {
+        "score": 0,
+        "country_code": "AF"
     }
 }
