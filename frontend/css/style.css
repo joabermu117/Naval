@@ -93,3 +93,34 @@ h1 {
     display: none;
     text-align: center;
 }
+
+.btn-ranking {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-ranking:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+}
+
+/* Estilos para el modal de ranking */
+#rankingModal .modal-content {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: white;
+    border: 1px solid #ff6b6b;
+}
+
+#rankingModal .modal-header {
+    border-bottom: 1px solid #ff6b6b;
+}
+
+#rankingModal .modal-footer {
+    border-top: 1px solid #ff6b6b;
+}
+
+#rankingModal .close {
+    color: white;
+}

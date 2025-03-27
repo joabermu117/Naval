@@ -29,7 +29,12 @@
                     </div>
                     <select class="form-select d-none" id="playerCountry" required></select>
                 </div>
-                <button type="submit" class="btn btn-custom w-100 py-2">Comenzar Juego</button>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-custom py-2">Comenzar Juego</button>
+                    <button type="button" class="btn btn-ranking py-2" data-bs-toggle="modal" data-bs-target="#rankingModal">
+                        Ver Ranking
+                    </button>
+                </div>
                 <div class="loading mt-3" id="loadingIndicator">
                     <div class="spinner-border text-light" role="status">
                         <span class="visually-hidden">Cargando...</span>
@@ -37,6 +42,11 @@
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Modal de Ranking (se carga desde otro HTML) -->
+    <div class="modal fade" id="rankingModal" tabindex="-1" aria-labelledby="rankingModalLabel" aria-hidden="true">
+        <!-- El contenido se cargará dinámicamente -->
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
