@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedText = document.getElementById("selectedText");
     const optionsList = document.getElementById("optionsList");
     const playerCountry = document.getElementById("playerCountry");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const startForm = document.getElementById("startForm");
     
     // Cargar países desde el backend
     fetch(`${BACKEND_URL}/countries`)
@@ -69,46 +71,68 @@ document.addEventListener("DOMContentLoaded", function () {
             selectedText.textContent = "Error al cargar países";
         });
     
-    // Manejar el envío del formulario
-    document.getElementById("startForm").addEventListener("submit", function(e) {
-        e.preventDefault();
+    // En la parte del submit del formulario 
+startForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    const playerName = document.getElementById("playerName").value.trim();
+    const countryCode = playerCountry.value;
+    
+    if (!playerName || !countryCode) {
+        alert("Por favor completa todos los campos");
+        return;
+    }
+    
+    if (playerName.length < 3) {
+        alert("El nombre debe tener al menos 3 caracteres");
+        return;
+    }
+    
+    loadingIndicator.style.display = "block";
+    
+    try {
+        // Verificar si el usuario existe
+        const scoresResponse = await fetch(`${BACKEND_URL}/ranking`);
+        if (!scoresResponse.ok) throw new Error("Error al verificar usuario");
         
-        const playerName = document.getElementById("playerName").value.trim();
-        const countryCode = playerCountry.value;
+        const scores = await scoresResponse.json();
+        const userExists = scores.some(user => user.nick_name === playerName);
         
-        if (!playerName || !countryCode) {
-            alert("Por favor completa todos los campos");
-            return;
-        }
-        
-        if (playerName.length < 3) {
-            alert("El nombre debe tener al menos 3 caracteres");
-            return;
-        }
-        
-        // Mostrar indicador de carga
-        document.getElementById("loadingIndicator").style.display = "block";
-        
-
-        
-        
-        // Simular carga (remplazar con tu lógica real)
-        setTimeout(() => {
-            alert(`¡Bienvenido ${playerName} (${selectedText.textContent})! Preparando el juego...`);
-            document.getElementById("loadingIndicator").style.display = "none";
+        if (!userExists) {
+            // Crear usuario nuevo
+            const createResponse = await fetch(`${BACKEND_URL}/score-recorder`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nick_name: playerName,
+                    score: 0,
+                    country_code: countryCode
+                })
+            });
             
-            // Redirigir al juego (reemplaza con tu URL real)
-            // window.location.href = "/juego.html?player=" + encodeURIComponent(playerName) + "&country=" + countryCode;
-        }, 1500);
-    });
+            if (!createResponse.ok) throw new Error("Error al crear usuario");
+        }
+        
+        // Guardar datos en sessionStorage (persisten hasta que se cierra la pestaña)
+        sessionStorage.setItem('playerData', JSON.stringify({
+            nick_name: playerName,
+            country_code: countryCode,
+            country_name: selectedText.textContent.trim()
+        }));
+        
+        // Redirigir a personalización
+        window.location.href = "personalizar-juego.html";
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert("Ocurrió un error al procesar tu solicitud. Por favor intenta nuevamente.");
+    } finally {
+        loadingIndicator.style.display = "none";
+    }
 });
-
-const selectedOption = document.getElementById("selectedOption");
-const selectedImg = document.getElementById("selectedImg");
-const selectedText = document.getElementById("selectedText");
-const optionsList = document.getElementById("optionsList");
-const playerCountry = document.getElementById("playerCountry");
-const rankingModal = document.getElementById("rankingModal");
+});
 
 document.getElementById('btnOpenRanking').addEventListener('click', function() {
     window.RankingModal.open();

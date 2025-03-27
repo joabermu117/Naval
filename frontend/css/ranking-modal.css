@@ -34,7 +34,7 @@
 
 .modal-header h2 {
     margin: 0;
-    color: #f1c40f;
+    color: yellow;
 }
 
 .close-modal {
@@ -76,7 +76,7 @@
 }
 
 .ranking-table th {
-    color: #f1c40f;
+    color: black;
 }
 
 .ranking-table td, .ranking-table th {
