@@ -1,27 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking Modal</title>
-    <link rel="stylesheet" href="../css/ranking-modal.css">
-</head>
-<body>
-    <div class="modal-overlay" id="rankingModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Batalla Naval</h2>
-                <span class="close-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <h3>Historial de puntuaciones</h3>
-                <div class="ranking-list" id="rankingList">
-                    <!-- Los elementos del ranking se generarán dinámicamente con JavaScript -->
-                </div>
+<div class="modal-overlay" id="rankingModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Batalla Naval - Ranking</h2>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <h3>Historial de puntuaciones</h3>
+            <div class="ranking-list" id="rankingList">
+                <!-- Los elementos del ranking se generarán dinámicamente -->
+                <div class="loading">Cargando ranking...</div>
             </div>
         </div>
     </div>
-
-    <script src="..\js\ranking.js"></script>
-</body>
-</html>
+</div>

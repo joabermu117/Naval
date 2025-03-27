@@ -2,5 +2,29 @@
     "fbc": {
         "score": 30,
         "country_code": "co"
-    }
+    },
+    "Jokin": {
+        "score": 100000,
+        "country_code": "ae"
+    },
+        "Aventurín": {
+            "score": 42,
+            "country_code": "es"
+        },
+        "Esteban": {
+            "score": 88,
+            "country_code": "eu"
+        },
+        "Nimblaria": {
+            "score": 64,
+            "country_code": "ch"
+        },
+        "Luminexio": {
+            "score": 91,
+            "country_code": "hk"
+        },
+        "Velocitera": {
+            "score": 37,
+            "country_code": "jp"
+        }
 }
