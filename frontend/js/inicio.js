@@ -89,6 +89,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Mostrar indicador de carga
         document.getElementById("loadingIndicator").style.display = "block";
         
+
+        
+        
         // Simular carga (remplazar con tu lógica real)
         setTimeout(() => {
             alert(`¡Bienvenido ${playerName} (${selectedText.textContent})! Preparando el juego...`);
@@ -99,3 +102,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1500);
     });
 });
+
+const selectedOption = document.getElementById("selectedOption");
+const selectedImg = document.getElementById("selectedImg");
+const selectedText = document.getElementById("selectedText");
+const optionsList = document.getElementById("optionsList");
+const playerCountry = document.getElementById("playerCountry");
+const rankingModal = document.getElementById("rankingModal");
+
+// Cargar modal de ranking desde otro HTML
+function loadRankingModal() {
+    fetch('ranking-modal.html')
+        .then(response => response.text())
+        .then(html => {
+            rankingModal.innerHTML = html;
+            // Inicializar el modal de Bootstrap
+            new bootstrap.Modal(rankingModal);
+            // Cargar datos del ranking
+            loadRankingData();
+        })
+        .catch(error => {
+            console.error('Error al cargar el modal:', error);
+            rankingModal.querySelector('.modal-body').innerHTML = 
+                '<div class="alert alert-danger">Error al cargar el ranking</div>';
+        });
+}
+
+
+// Cargar modal cuando se haga clic en el botón
+document.querySelector('.btn-ranking').addEventListener('click', loadRankingModal);
