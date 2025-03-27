@@ -123,7 +123,7 @@ startForm.addEventListener("submit", async function(e) {
         }));
         
         // Redirigir a personalización
-        window.location.href = "personalizar-juego.html";
+        window.location.href = "personalizar.html";
         
     } catch (error) {
         console.error('Error:', error);
