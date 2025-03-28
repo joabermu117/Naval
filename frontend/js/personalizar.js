@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Generar el estado del tablero
+    // Generar el estado del tablero lleno de ceros
     function generateBoardState() {
         boardState = Array(currentBoardSize).fill().map(() => Array(currentBoardSize).fill(0));
     }
@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.dataset.row = row;
                 cell.dataset.col = col;
                 
+                //Detectar la ubicacion del mouse
                 cell.addEventListener('mouseover', () => handleCellHover(row, col));
                 cell.addEventListener('mouseout', clearHoverPreview);
                 cell.addEventListener('click', () => handleCellClick(row, col));
@@ -141,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const r = isHorizontal ? row : row + i;
             const c = isHorizontal ? col + i : col;
             
+            //Si se sale del tablero, o ya hay un elemento no lo muestre
             if (r >= currentBoardSize || c >= currentBoardSize || boardState[r][c] !== 0) {
                 isValid = false;
                 break;
@@ -245,7 +247,9 @@ document.addEventListener('DOMContentLoaded', () => {
         locationName.textContent = location.name;
         
         const tempC = weatherData.main.temp;
+        //Convertir a farenheit
         const tempF = (tempC * 9/5) + 32;
+        //Pasar a km/h, toFixed(1) quita un decimal
         const windSpeedKmh = (weatherData.wind.speed * 3.6).toFixed(1);
         
         temperatureInfo.innerHTML = `

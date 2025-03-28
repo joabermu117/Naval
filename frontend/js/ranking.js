@@ -20,10 +20,10 @@ async function fetchRankingData() {
 // Función para renderizar el ranking (combinación de ambos)
 function renderRanking(data) {
     const rankingList = document.getElementById('rankingList');
-    const tablaRanking = document.getElementById('body-ranking');
+
     
     // Determinar qué elemento usar
-    const targetElement = rankingList || tablaRanking;
+    const targetElement = rankingList 
     if (!targetElement) {
         console.error('No se encontró el elemento para mostrar el ranking');
         return;
@@ -71,8 +71,8 @@ function renderRanking(data) {
             row.classList.add('bg-light');
         }
         
-        // Usar nick_name del primer código o nickname del segundo
-        const nickname = usuario.nick_name || usuario.nickname;
+        // Usar nick_name del primer código
+        const nickname = usuario.nick_name ;
         const score = usuario.score;
         const countryCode = (usuario.country_code || 'unknown').toUpperCase();
         
@@ -97,9 +97,7 @@ function renderRanking(data) {
     // Insertar en el contenedor apropiado
     if (rankingList) {
         rankingList.appendChild(table);
-    } else {
-        targetElement.appendChild(table);
-    }
+    } 
 }
 
 // Funciones para manejar el modal (del segundo código)

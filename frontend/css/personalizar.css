@@ -109,10 +109,6 @@ body {
     background-color: rgba(144, 238, 144, 0.5);
 }
 
-.board-cell.highlight.invalid {
-    background-color: rgba(255, 99, 71, 0.5);
-}
-
 /* Selector de barcos */
 .ship-selector .ship {
     padding: 10px;
