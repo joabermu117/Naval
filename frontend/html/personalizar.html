@@ -2,41 +2,47 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalla Naval - Configuración</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/personalizar.css">
 </head>
 <body>
-    <nav class="navbar custom-nav">
+    <nav class="navbar navbar-expand-lg custom-nav">
         <div class="container-fluid">
             <span class="navbar-brand nav-title">Batalla Naval</span>
-            <div class="d-flex player-info-container">
-                <div id="playerInfoContainer"></div>
-                <button class="home-btn" onclick="window.location.href='index.html'">Volver al Inicio</button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex ms-auto player-info-container align-items-center">
+                    <div id="playerInfoContainer"></div>
+                    <button class="home-btn ms-2" onclick="window.location.href='inicio.html'">Volver al Inicio</button>
+                </div>
             </div>
         </div>
     </nav>
-    <div class="container mt-5">
+    
+    <div class="container mt-3 mt-md-5">
+        <h1 class="text-center mb-3 mb-md-4">Batalla Naval - Configuración</h1>
         
-        <h1 class="text-center mb-4">Batalla Naval - Configuración</h1>
-        
-        <div class="row">
+        <div class="row g-3">
             <!-- Tamaño del Tablero -->
-            <div class="col-md-4">
-                <div class="card mb-3">
+            <div class="col-12 col-md-4">
+                <div class="card h-100">
                     <div class="card-header">Tamaño del Tablero</div>
                     <div class="card-body">
                         <input type="range" id="boardSizeRange" 
                                min="10" max="20" value="10" 
                                class="form-range">
-                        <p id="boardSizeText" class="text-center">10 x 10</p>
+                        <p id="boardSizeText" class="text-center mb-0">10 x 10</p>
                     </div>
                 </div>
             </div>
 
             <!-- Selección de Barcos -->
-            <div class="col-md-4">
-                <div class="card mb-3">
+            <div class="col-12 col-md-4">
+                <div class="card h-100">
                     <div class="card-header">Barcos</div>
                     <div class="card-body">
                         <div class="ship-selector">
@@ -51,20 +57,35 @@
             </div>
 
             <!-- Ubicación y Clima -->
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">Ubicación de Batalla</div>
-                    <div class="card-body">
-                        <button id="selectLocationBtn" class="btn btn-primary w-100 mb-3">
-                            Seleccionar Ubicación
-                        </button>
-                        <div id="weatherInfo" class="d-none">
-                            <h5>Información del Clima</h5>
-                            <p id="temperatureInfo"></p>
-                            <p id="conditionInfo"></p>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-12 col-md-4">
+                <!-- En la sección de Ubicación y Clima (dentro del card-body), reemplaza con: -->
+<!-- Reemplaza el botón actual en tu HTML -->
+<div class="card-body">
+    <div class="mb-3">
+        <label for="locationSelect" class="form-label">Seleccionar Ubicación:</label>
+        <select id="locationSelect" class="form-select">
+            <option value="">-- Elige una ubicación --</option>
+            <!-- Las opciones se llenarán con JavaScript -->
+        </select>
+    </div>
+    <button id="selectLocationBtn" class="btn btn-primary w-100 mb-3">
+        Confirmar Ubicación
+    </button>
+    <div id="weatherLoading" class="d-none text-center mb-2">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="small mt-2">Consultando condiciones climáticas...</p>
+    </div>
+    <div id="weatherInfo" class="d-none">
+        <h5 class="h6">Información del Clima</h5>
+        <div class="weather-details">
+            <p id="locationName" class="fw-bold mb-2"></p>
+            <p id="temperatureInfo" class="mb-1 small"></p>
+            <p id="conditionInfo" class="small"></p>
+        </div>
+    </div>
+</div>
             </div>
         </div>
 
@@ -73,16 +94,18 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">Tablero de Juego</div>
-                    <div class="card-body">
-                        <div id="gameBoard" class="game-board"></div>
+                    <div class="card-body p-2 p-md-3">
+                        <div id="gameBoard" class="game-board mx-auto"></div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Controles -->
-        <div class="row mt-3">
-            <div class="col-12 text-center">
+    <!-- Controles Fijos en la parte inferior -->
+    <div class="fixed-bottom bg-white shadow-sm p-2">
+        <div class="container">
+            <div class="d-flex justify-content-center">
                 <button id="rotateBtn" class="btn btn-success me-2">Rotar Barco</button>
                 <button id="startGameBtn" class="btn btn-primary">Iniciar Juego</button>
             </div>
@@ -91,12 +114,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/personalizar.js"></script>
-    <script src="../js/mapa.js"></script>
     <script src="../js/user-data.js"></script>
-    <div id="map"><script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"
-        defer
-      ></script></div>
-    
+
 </body>
 </html>
