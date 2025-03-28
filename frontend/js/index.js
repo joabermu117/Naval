@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
         playerCountry.appendChild(option);
       });
 
-      // Llenar el menú visual
+      // Llenar el select de los paises, cuando se le hace click en uno se guarda en el span
       optionsList.innerHTML = "";
       countries.forEach((country) => {
         let li = document.createElement("li");

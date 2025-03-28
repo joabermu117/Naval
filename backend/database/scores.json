@@ -42,5 +42,13 @@
     "juan": {
         "score": 0,
         "country_code": "AF"
+    },
+    "aaaaa": {
+        "score": 0,
+        "country_code": "DE"
+    },
+    "jjjj": {
+        "score": 0,
+        "country_code": "AF"
     }
 }
