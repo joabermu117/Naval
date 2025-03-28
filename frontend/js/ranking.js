@@ -95,11 +95,7 @@ function renderRanking(data) {
     table.appendChild(tbody);
     
     // Insertar en el contenedor apropiado
-    if (rankingList) {
-        rankingList.appendChild(table);
-    } else {
-        targetElement.appendChild(table);
-    }
+     rankingList.appendChild(table);
 }
 
 // Funciones para manejar el modal (del segundo código)
@@ -150,45 +146,6 @@ function closeModal() {
     }
 }
 
-// Cargar ranking automáticamente si estamos en la página de ranking
-document.addEventListener('DOMContentLoaded', () => {
-    // Si estamos en la página de ranking independiente
-    if (window.location.pathname.includes('ranking.html')) {
-        // Cargar y mostrar los datos inmediatamente
-        (async () => {
-            try {
-                const data = await fetchRankingData();
-                rankingData = data;
-                renderRanking(data);
-            } catch (error) {
-                const rankingList = document.getElementById('rankingList') || 
-                                 document.getElementById('body-ranking');
-                if (rankingList) {
-                    rankingList.innerHTML = '<div class="error">Error al cargar el ranking</div>';
-                }
-                console.error('Error:', error);
-            }
-        })();
-        
-        // Configurar botón de cerrar para redirigir
-        const closeBtn = document.querySelector('.close-modal');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                window.location.href = 'index.html';
-            });
-        }
-    } else if (document.getElementById('body-ranking')) {
-        // Cargar ranking en otras páginas donde exista el elemento body-ranking
-        (async () => {
-            try {
-                const data = await fetchRankingData();
-                renderRanking(data);
-            } catch (error) {
-                console.error('Error al cargar ranking:', error);
-            }
-        })();
-    }
-});
 
 // Exportar funciones para que puedan ser llamadas desde otros archivos
 window.RankingModal = {
