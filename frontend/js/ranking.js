@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeBtn = document.querySelector('.close-modal');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
-                window.location.href = 'inicio.html';
+                window.location.href = 'index.html';
             });
         }
     } else if (document.getElementById('body-ranking')) {
