@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Generar el tablero visual
     function generateGameBoard() {
         gameBoard.innerHTML = '';
-        gameBoard.style.gridTemplateColumns = `repeat(${currentBoardSize}, 40px)`;
+        adjustBoardSize();
         
         for (let row = 0; row < currentBoardSize; row++) {
             for (let col = 0; col < currentBoardSize; col++) {
@@ -95,6 +95,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    function adjustBoardSize() {
+        const container = gameBoard.parentElement;
+        const availableWidth = container.clientWidth - 20; // Restar padding
+        const cellSize = Math.max(
+            Math.min(
+                Math.floor(availableWidth / currentBoardSize) - 1, // Restar gap
+                40 // Tamaño máximo
+            ),
+            12 // Tamaño mínimo
+        );
+        
+        gameBoard.style.gridTemplateColumns = `repeat(${currentBoardSize}, ${cellSize}px)`;
+        
+        // Ajustar tamaño de fuente
+        document.querySelectorAll('.board-cell').forEach(cell => {
+            cell.style.fontSize = `${Math.max(cellSize * 0.5, 10)}px`;
+        });
+    }
+
 
     // Configurar la selección de barcos
     function setupShipSelection() {
@@ -132,8 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isValid) {
             hoverPreview.forEach(pos => {
                 const cell = document.querySelector(`.board-cell[data-row="${pos.row}"][data-col="${pos.col}"]`);
-                cell.textContent = ship.emoji;
-                cell.classList.add('highlight', isValid ? 'valid' : 'invalid');
+                if (cell) {
+                    cell.innerHTML = `<div class="ship-emoji">${ship.emoji}</div>`;
+                    cell.classList.add('highlight', 'valid');
+                }
             });
         }
     }
@@ -157,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ship = shipsToPlace[currentShipIndex];
         let isValid = true;
         
+        // Verificar si la posición es válida
         for (let i = 0; i < ship.length; i++) {
             const r = isHorizontal ? row : row + i;
             const c = isHorizontal ? col + i : col;
@@ -168,25 +191,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (isValid) {
+            // Colocar el barco
             for (let i = 0; i < ship.length; i++) {
                 const r = isHorizontal ? row : row + i;
                 const c = isHorizontal ? col + i : col;
                 
                 boardState[r][c] = currentShipIndex + 1;
                 const cell = document.querySelector(`.board-cell[data-row="${r}"][data-col="${c}"]`);
-                
-                cell.innerHTML = '';
-                const emoji = document.createElement('div');
-                emoji.className = 'ship-emoji';
-                emoji.textContent = ship.emoji;
-                cell.appendChild(emoji);
-                
+                cell.innerHTML = `<div class="ship-emoji">${ship.emoji}</div>`;
                 cell.setAttribute('data-ship', currentShipIndex + 1);
                 cell.classList.add('occupied');
                 cell.classList.remove('highlight', 'valid', 'invalid');
             }
             
             shipsToPlace[currentShipIndex].placed = true;
+            
+            // Mover al siguiente barco no colocado
             const nextShipIndex = shipsToPlace.findIndex((ship, idx) => idx >= currentShipIndex && !ship.placed);
             currentShipIndex = nextShipIndex !== -1 ? nextShipIndex : shipsToPlace.length;
             
@@ -321,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUI() {
         shipSelectors.forEach((shipElement, index) => {
             const ship = shipsToPlace[index];
+            
             shipElement.classList.toggle('selected', index === currentShipIndex);
             shipElement.classList.toggle('placed', ship.placed);
             
@@ -331,7 +352,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        startGameBtn.disabled = !shipsToPlace.every(ship => ship.placed) || !selectedLocation;
+        const allShipsPlaced = shipsToPlace.every(ship => ship.placed);
+        startGameBtn.disabled = !allShipsPlaced || !selectedLocation;
     }
 
     // Inicializar la aplicación
