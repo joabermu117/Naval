@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const conditionInfo = document.getElementById('conditionInfo');
     const locationName = document.getElementById('locationName');
     const startGameBtn = document.getElementById('startGameBtn');
+    const resetShips = document.getElementById('resetShipsBtn');
+
     
     // Variables de estado
     let currentBoardSize = 10;
@@ -336,10 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Reiniciar barcos
-    function resetShips() {
+    resetShips.addEventListener('click', ()=> {
         shipsToPlace.forEach(ship => ship.placed = false);
         currentShipIndex = 0;
-    }
+    })
 
     // Actualizar UI
     function updateUI() {
