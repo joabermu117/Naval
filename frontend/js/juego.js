@@ -59,5 +59,42 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
     }
+
+        // Mostrar información meteorológica
+        function displayWeatherInfo() {
+            if (!weatherData || !gameLocation) {
+                weatherInfo.classList.add('d-none');
+                return;
+            }
+    
+            weatherInfo.classList.remove('d-none');
+            locationName.textContent = gameLocation.name;
+            
+            const tempC = weatherData.main.temp;
+            const tempF = (tempC * 9/5) + 32;
+            const windSpeedKmh = (weatherData.wind.speed * 3.6).toFixed(1);
+            
+            temperatureInfo.innerHTML = `
+                <strong>Temperatura:</strong> ${tempC.toFixed(1)}°C (${tempF.toFixed(1)}°F)<br>
+                <strong>Sensación térmica:</strong> ${weatherData.main.feels_like.toFixed(1)}°C
+            `;
+            
+            conditionInfo.innerHTML = `
+                <strong>Condición:</strong> ${weatherData.weather[0].description}<br>
+                <strong>Viento:</strong> ${windSpeedKmh} km/h<br>
+                <strong>Dirección:</strong> ${getWindDirection(weatherData.wind.deg)}<br>
+                <strong>Humedad:</strong> ${weatherData.main.humidity}%
+            `;
+        }
+    
+        // Convertir dirección del viento
+        function getWindDirection(degrees) {
+            const directions = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+            const index = Math.round((degrees % 360) / 45) % 8;
+            return directions[index];
+        }
+        
+
+
     initGame();
 });
