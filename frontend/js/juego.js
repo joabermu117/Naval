@@ -93,8 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = Math.round((degrees % 360) / 45) % 8;
             return directions[index];
         }
-<<<<<<< HEAD
-=======
         
 
 // Restaurar eventos para las celdas del tablero
@@ -112,7 +110,6 @@ function restoreCellEvents() {
         cell.addEventListener('click', () => handleCellClick(row, col));
     });
 }
->>>>>>> 0b7156fe97810cb54357e4e20b55d5b523187e22
 
 // Manejar clic en celdas
 function handleCellClick(row, col) {
