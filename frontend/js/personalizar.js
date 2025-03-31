@@ -300,8 +300,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Iniciar juego
-    startGameBtn.addEventListener('click', () => {
+    // Función para generar el tablero de la IA
+    function generateOpponentBoardState(playerBoardState) {
+        // Crear un tablero vacío del mismo tamaño
+        const boardSize = playerBoardState.length;
+        const opponentBoard = Array(boardSize).fill().map(() => Array(boardSize).fill(0));
+        
+        // Analizar los barcos del jugador para replicar la misma cantidad y tamaños
+        const playerShips = analyzePlayerShips();
+        
+        // Colocar cada barco de la IA en posiciones aleatorias
+        playerShips.forEach(ship => {
+            let placed = false;
+            
+            while (!placed) {
+                // Determinar orientación aleatoria (0: horizontal, 1: vertical)
+                const isVertical = Math.random() < 0.5;
+                const shipLength = ship.size;
+                
+                // Generar posición inicial aleatoria
+                const maxRow = isVertical ? boardSize - shipLength : boardSize - 1;
+                const maxCol = isVertical ? boardSize - 1 : boardSize - shipLength;
+                
+                const startRow = Math.floor(Math.random() * (maxRow + 1));
+                const startCol = Math.floor(Math.random() * (maxCol + 1));
+                
+                // Verificar si la posición es válida
+                if (canPlaceShip(opponentBoard, startRow, startCol, shipLength, isVertical)) {
+                    // Colocar el barco
+                    for (let i = 0; i < shipLength; i++) {
+                        const r = isVertical ? startRow + i : startRow;
+                        const c = isVertical ? startCol : startCol + i;
+                        opponentBoard[r][c] = ship.type; // Usamos el mismo tipo que el jugador
+                    }
+                    placed = true;
+                }
+            }
+        });
+        
+        return opponentBoard;
+    }
+
+    // Modificar el evento click del botón de inicio
+    startGameBtn.addEventListener('click', async () => {
         if (shipsToPlace.some(ship => !ship.placed)) {
             alert("Debes colocar todos los barcos antes de iniciar el juego.");
             return;
@@ -312,20 +353,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        const gameData = {
-            boardSize: currentBoardSize,
-            ships: shipsToPlace.map(ship => ({
-                name: ship.name,
-                length: ship.length,
-                positions: []
-            })),
-            boardState: boardState,
-            location: selectedLocation
-        };
-        
-        console.log("Juego iniciado con datos:", gameData);
-        alert(`¡Batalla naval iniciada en ${selectedLocation.name}!`);
+        try {
+            const weatherData = await fetchWeatherData(selectedLocation.lat, selectedLocation.lng);
+            
+            // Generar el tablero del oponente
+            const opponentBoardState = generateOpponentBoardState(boardState);
+            const opponentBoard = generateOpponentBoard(opponentBoardState)
+            
+            const gameData = {
+                player: {
+                    state: boardState,
+                    
+                },
+                opponent: {
+                    state: opponentBoardState
+    
+                },
+                board: gameBoard.outerHTML,
+                opponentBoard: opponentBoard.outerHTML,
+                weatherData: weatherData,
+                location: selectedLocation
+            };
+            
+            localStorage.setItem('currentGameData', JSON.stringify(gameData));
+            window.location.href = 'juego.html';
+        } catch (error) {
+            alert("Error al iniciar el juego: " + error.message);
+        }
     });
+
 
     // Cambiar tamaño del tablero
     boardSizeRange.addEventListener('input', () => {
@@ -372,8 +428,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicializar la aplicación
     init();
-    
-    if (typeof displayPlayerInfo === 'function') {
-        displayPlayerInfo('playerInfoContainer');
-    }
+
 });
