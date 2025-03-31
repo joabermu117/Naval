@@ -93,8 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = Math.round((degrees % 360) / 45) % 8;
             return directions[index];
         }
-        
-
 
     initGame();
 });
