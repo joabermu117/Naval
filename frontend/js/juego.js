@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Configurar información del jugador
             displayPlayerInfo('playerInfoContainer');
             
+            
             // Mostrar información del clima
             displayWeatherInfo();
             

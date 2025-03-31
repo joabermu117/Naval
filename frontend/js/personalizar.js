@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let boardState = [];
     let hoverPreview = [];
 
+    displayPlayerInfo('playerInfoContainer');
+
     // Lista de ubicaciones estratégicas
     const navalLocations = [
         { name: "Estrecho de Gibraltar", lat: 36.1408, lng: -5.3536 },
