@@ -109,6 +109,10 @@ body {
     background-color: rgba(144, 238, 144, 0.5);
 }
 
+.board-cell.highlight.invalid {
+    background-color: rgba(255, 99, 71, 0.5);
+}
+
 /* Selector de barcos */
 .ship-selector .ship {
     padding: 10px;
@@ -172,31 +176,4 @@ body {
     bottom: 0;
     background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
     z-index: 1;
-}
-
-.weather-details {
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    padding: 10px;
-    margin-top: 5px;
-}
-#locationSelect {
-    margin-bottom: 15px;
-}
-
-
-.weather-details p {
-    margin-bottom: 3px;
-}
-
-#weatherExtra {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
-}
-
-#weatherExtra div {
-    background-color: #e9ecef;
-    padding: 5px;
-    border-radius: 3px;
 }

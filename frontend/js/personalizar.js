@@ -22,12 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedLocation = null;
     
     // Configuración de barcos
-    const shipsToPlace = [
-        { name: "Portaaviones", length: 5, emoji: "🚢", placed: false },
-        { name: "Acorazado", length: 4, emoji: "⛴", placed: false },
-        { name: "Crucero", length: 3, emoji: "🛳", placed: false },
+
+    const shipsToPlace = [{ name: "Destructor", length: 1, emoji: "⚓", placed: false },
         { name: "Submarino", length: 2, emoji: "🚤", placed: false },
-        { name: "Destructor", length: 1, emoji: "⚓", placed: false }
+        { name: "Crucero", length: 3, emoji: "🛳", placed: false },
+        { name: "Acorazado", length: 4, emoji: "⛴", placed: false },
+        { name: "Portaaviones", length: 5, emoji: "🚢", placed: false },
     ];
     
     let currentShipIndex = 0;
@@ -345,8 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return boardElement;
     }
 
-    // Iniciar juego
-    startGameBtn.addEventListener('click', () => {
+
     // Función para generar el tablero de la IA
     function generateOpponentBoardState(playerBoardState) {
         // Crear un tablero vacío del mismo tamaño
@@ -387,6 +386,38 @@ document.addEventListener('DOMContentLoaded', () => {
         
         return opponentBoard;
     }
+            // Función para analizar los barcos del jugador
+            function analyzePlayerShips() {
+                return shipsToPlace.map((ship, index) => ({
+                    type: index + 1,  // Los tipos empiezan en 1
+                    size: ship.length
+                }));
+            }
+        
+            // Función para verificar si se puede colocar un barco
+            function canPlaceShip(board, startRow, startCol, length, isVertical) {
+                // Verificar que no salga del tablero
+                if (isVertical) {
+                    if (startRow + length > board.length) return false;
+                } else {
+                    if (startCol + length > board[0].length) return false;
+                }
+                
+                // Verificar que no colisione con otros barcos
+                for (let i = 0; i < length; i++) {
+                    const row = isVertical ? startRow + i : startRow;
+                    const col = isVertical ? startCol : startCol + i;
+                    
+                    // Verificar la celda y sus adyacentes
+                    for (let r = Math.max(0, row - 1); r <= Math.min(board.length - 1, row + 1); r++) {
+                        for (let c = Math.max(0, col - 1); c <= Math.min(board[0].length - 1, col + 1); c++) {
+                            if (board[r][c] !== 0) return false;
+                        }
+                    }
+                }
+                
+                return true;
+            }
 
     // Modificar el evento click del botón de inicio
     startGameBtn.addEventListener('click', async () => {
