@@ -98,22 +98,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function adjustBoardSize() {
+        //Obtiene el contenedor padre de gameBoard
         const container = gameBoard.parentElement;
+        //Obtiene el ancho dispoible
         const availableWidth = container.clientWidth - 20; // Restar padding
         const cellSize = Math.max(
-            Math.min(
-                Math.floor(availableWidth / currentBoardSize) - 1, // Restar gap
-                40 // Tamaño máximo
-            ),
+            Math.min(Math.floor(availableWidth / currentBoardSize) - 1, // Restar gap 
+             40 // Tamaño máximo
+        ),
             12 // Tamaño mínimo
         );
-        
+        //Asignar a cada columna el tamaño calculado, currentBoardSize: numero de columnas, cellSize: tamaño de la columna
         gameBoard.style.gridTemplateColumns = `repeat(${currentBoardSize}, ${cellSize}px)`;
-        
-        // Ajustar tamaño de fuente
-        document.querySelectorAll('.board-cell').forEach(cell => {
-            cell.style.fontSize = `${Math.max(cellSize * 0.5, 10)}px`;
-        });
+    
     }
 
 
@@ -298,6 +295,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Función para generar un tablero visual
+    function generateOpponentBoard(boardState) {
+        const boardElement = document.createElement('div');
+        boardElement.classList.add('game-board', 'mx-auto');
+        boardElement.id = "opponentBoard";
+        
+        // Ajustar tamaño del tablero
+        boardElement.style.gridTemplateColumns = `repeat(${boardState.length}, 1fr)`;
+        
+        // Calcular tamaño de celdas similar al tablero principal
+        const container = document.getElementById('opponentBoardContainer') || document.body;
+        const availableWidth = container.clientWidth - 20;
+        const cellSize = Math.max(
+            Math.min(
+                Math.floor(availableWidth / boardState.length) - 1,
+                40
+            ),
+            12
+        );
+        
+        boardElement.style.gridTemplateColumns = `repeat(${boardState.length}, ${cellSize}px)`;
+        
+        for (let row = 0; row < boardState.length; row++) {
+            for (let col = 0; col < boardState[row].length; col++) {
+                const cell = document.createElement('div');
+                cell.classList.add('board-cell');
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                
+                // Ajustar tamaño de fuente
+                cell.style.fontSize = `${Math.max(cellSize * 0.5, 10)}px`;
+                
+                // Mostrar barcos (opcional, normalmente el tablero del oponente no muestra barcos)
+                if (boardState[row][col] !== 0) {
+                    const shipType = boardState[row][col];
+                    const ship = shipsToPlace.find(s => s.length === shipType);
+                    if (ship) {
+                        cell.innerHTML = `<div class="ship-emoji">${ship.emoji}</div>`;
+                        cell.classList.add('occupied');
+                    }
+                }
+                
+                boardElement.appendChild(cell);
+            }
+        }
+        return boardElement;
+    }
+
     // Iniciar juego
     startGameBtn.addEventListener('click', () => {
         if (shipsToPlace.some(ship => !ship.placed)) {
@@ -359,6 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const allShipsPlaced = shipsToPlace.every(ship => ship.placed);
         startGameBtn.disabled = !allShipsPlaced || !selectedLocation;
     }
+
+    
 
     // Inicializar la aplicación
     init();
