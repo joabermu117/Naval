@@ -93,6 +93,77 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = Math.round((degrees % 360) / 45) % 8;
             return directions[index];
         }
+<<<<<<< HEAD
+=======
+        
 
-    initGame();
+// Restaurar eventos para las celdas del tablero
+function restoreCellEvents() {
+    const cells = playerBoard.querySelectorAll('.board-cell');
+    
+    cells.forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        
+        // Limpiar eventos previos
+        cell.replaceWith(cell.cloneNode(true));
+        
+        // Agregar nuevos eventos
+        cell.addEventListener('click', () => handleCellClick(row, col));
+    });
+}
+>>>>>>> 0b7156fe97810cb54357e4e20b55d5b523187e22
+
+// Manejar clic en celdas
+function handleCellClick(row, col) {
+    if (gamePhase !== 'player-turn') return;
+    
+    const cell = document.querySelector(`.board-cell[data-row="${row}"][data-col="${col}"]`);
+    
+    // Verificar si hay un barco en esta celda
+    if (cell.classList.contains('occupied')) {
+        cell.innerHTML = '💥';
+        cell.classList.add('hit');
+        addGameMessage("¡Impacto! Has golpeado un barco.");
+    } else {
+        cell.innerHTML = '🌊';
+        cell.classList.add('miss');
+        addGameMessage("Agua. No has impactado ningún barco.");
+    }
+}
+
+// Añadir mensaje al historial del juego
+function addGameMessage(message, isImportant = false) {
+    const messageElement = document.createElement('p');
+    messageElement.textContent = message;
+    if (isImportant) {
+        messageElement.classList.add('fw-bold');
+    }
+    
+    gameMessages.appendChild(messageElement);
+    gameMessages.scrollTop = gameMessages.scrollHeight;
+}
+
+// Configurar event listeners
+function setupEventListeners() {
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            if (confirm("¿Estás seguro de que quieres reiniciar el juego?")) {
+                window.location.href = 'personalizar.html';
+            }
+        });
+    }
+    
+    if (surrenderBtn) {
+        surrenderBtn.addEventListener('click', () => {
+            if (confirm("¿Estás seguro de que quieres rendirte?")) {
+                addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
+                gamePhase = 'game-over';
+            }
+        });
+    }
+}
+
+initGame();
+setupEventListeners();
 });
