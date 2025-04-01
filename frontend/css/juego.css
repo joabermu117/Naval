@@ -133,3 +133,65 @@
     padding: 10px 0;
     border-top: 1px solid #dee2e6;
 }
+
+/* Fondos para los tableros según el clima */
+.game-board.weather-sunny {
+    background-image: url('https://cdn.pixabay.com/photo/2020/08/28/11/10/ocean-5524264_1280.jpg'); /* soleado bg */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+.game-board.weather-rainy {
+    background-image: url('https://i.pinimg.com/736x/b5/ce/f2/b5cef2c7e897b351c8df468e21717053.jpg'); /* lluvia bg */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+.game-board.weather-cloudy {
+    background-image: url('https://cdn.pixabay.com/photo/2017/08/02/09/40/dark-2570442_1280.jpg'); /* Nublado bg */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+.game-board.weather-snowy {
+    background-image: url('https://cdn.pixabay.com/photo/2016/11/19/10/01/clouds-1838410_1280.jpg'); /* Nieve bg */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+.game-board.weather-stormy {
+    background-image: url('https://st2.depositphotos.com/9322398/12120/i/450/depositphotos_121208818-stock-photo-ghost-storm-ship.jpg'); /* Imagen de clima tormentoso */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+.game-board.weather-foggy {
+
+    background-image: url('https://i.pinimg.com/736x/dc/6d/33/dc6d333c3e74acb9fb693110e276e875.jpg'); /* Niebla bg */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+.game-board.weather-night {
+    background-image: url('https://i.pinimg.com/736x/cb/45/b9/cb45b92557e49030c34030756513ca15.jpg'); /* Imagen de niebla */
+    background-size: cover;
+    background-position: center;
+    background-image: no-repeat;
+}
+
+/* Asegurar que las celdas sean visibles sobre los nuevos fondos */
+.board-cell {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.board-cell:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
