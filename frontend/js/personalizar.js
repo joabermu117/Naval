@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         hoverPreview = [];
     }
-
+//Prueba de cuenta de github
     // Manejar clic en celdas
     function handleCellClick(row, col) {
         if (currentShipIndex >= shipsToPlace.length) return;
