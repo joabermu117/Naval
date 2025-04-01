@@ -67,13 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 weatherInfo.classList.add('d-none');
                 return;
             }
-    
+        
             weatherInfo.classList.remove('d-none');
             locationName.textContent = gameLocation.name;
             
             const tempC = weatherData.main.temp;
             const tempF = (tempC * 9/5) + 32;
             const windSpeedKmh = (weatherData.wind.speed * 3.6).toFixed(1);
+            const weatherCondition = weatherData.weather[0].main.toLowerCase(); // Obtener condición climática
             
             temperatureInfo.innerHTML = `
                 <strong>Temperatura:</strong> ${tempC.toFixed(1)}°C (${tempF.toFixed(1)}°F)<br>
@@ -86,6 +87,88 @@ document.addEventListener('DOMContentLoaded', () => {
                 <strong>Dirección:</strong> ${getWindDirection(weatherData.wind.deg)}<br>
                 <strong>Humedad:</strong> ${weatherData.main.humidity}%
             `;
+            
+            // Llamar a setWeatherBackground con la condición actual
+            setWeatherBackground(weatherCondition);
+        }
+        
+
+        function setWeatherBackground(condition) {
+            const weatherCard = document.getElementById('weatherInfo');
+            const playerBoard = document.getElementById('playerBoard');
+            const opponentBoard = document.getElementById('opponentBoard');
+            
+            // Resetear clases de todos los elementos
+            const elements = [weatherCard, playerBoard, opponentBoard];
+            elements.forEach(el => {
+                el.classList.remove(
+                    'weather-sunny', 'weather-rainy', 'weather-cloudy', 
+                    'weather-snowy', 'weather-stormy', 'weather-foggy',
+                    'weather-night'
+                );
+            });
+            
+            // Determinar si es de noche (para el fondo del tablero)
+            const isNight = isCurrentlyNight();
+            if (isNight) {
+                playerBoard.classList.add('weather-night');
+                opponentBoard.classList.add('weather-night');
+            }
+            
+            // Añadir clase según la condición
+            switch(condition) {
+                case 'clear':
+                    weatherCard.classList.add('weather-sunny');
+                    if (!isNight) {
+                        playerBoard.classList.add('weather-sunny');
+                        opponentBoard.classList.add('weather-sunny');
+                    }
+                    break;
+                case 'rain':
+                case 'drizzle':
+                    weatherCard.classList.add('weather-rainy');
+                    playerBoard.classList.add('weather-rainy');
+                    opponentBoard.classList.add('weather-rainy');
+                    break;
+                case 'clouds':
+                    weatherCard.classList.add('weather-cloudy');
+                    playerBoard.classList.add('weather-cloudy');
+                    opponentBoard.classList.add('weather-cloudy');
+                    break;
+
+                case 'thunderstorm':
+                    weatherCard.classList.add('weather-stormy');
+                    playerBoard.classList.add('weather-stormy');
+                    opponentBoard.classList.add('weather-stormy');
+                    break;
+                case 'mist':
+                case 'smoke':
+                case 'haze':
+                case 'dust':
+                case 'fog':
+                case 'sand':
+                case 'ash':
+                case 'squall':
+                case 'tornado':
+                    weatherCard.classList.add('weather-foggy');
+                    playerBoard.classList.add('weather-foggy');
+                    opponentBoard.classList.add('weather-foggy');
+                    break;
+                default:
+                    // Fondo por defecto
+                    weatherCard.style.background = '#f8f9fa';
+            }
+        }
+        
+        // Función para determinar si es de noche (puedes adaptarla según tu API del clima)
+        function isCurrentlyNight() {
+            if (!weatherData) return false;
+            
+            const now = new Date();
+            const sunrise = new Date(weatherData.sys.sunrise * 1000);
+            const sunset = new Date(weatherData.sys.sunset * 1000);
+            
+            return now < sunrise || now > sunset;
         }
     
         // Convertir dirección del viento
