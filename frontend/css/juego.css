@@ -190,3 +190,42 @@
     background-color: rgba(255, 255, 255, 0.9);
 }
 
+
+.hit {
+    background-color: #ff6b6b;
+}
+
+.sunk {
+    background-color: #ff0000;
+}
+
+.near-hit {
+    background-color: #add8e6;
+}
+
+#victoryOverlay h1 {
+    font-size: 4rem;
+    color: #ffcc00;
+    text-shadow: 2px 2px 4px #000;
+    margin-bottom: 20px;
+}
+
+#victoryOverlay p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+}
+
+.modal-body h4 {
+    color: #0d6efd;
+    margin-bottom: 15px;
+}
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.list-group-item span {
+    font-weight: bold;
+    color: #333;
+}
