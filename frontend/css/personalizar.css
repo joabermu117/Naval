@@ -94,6 +94,7 @@ body {
 .board-cell.occupied[data-ship="3"] { background-color: #45B7D1; } /* Crucero */
 .board-cell.occupied[data-ship="4"] { background-color: #FFBE0B; } /* Submarino */
 .board-cell.occupied[data-ship="5"] { background-color: #A05195; } /* Destructor */
+.board-cell.occupied[data-ship="6"] { background-color: rgb(67, 168, 67); } /* Destructor */
 
 .ship-emoji {
     position: absolute;
@@ -135,6 +136,7 @@ body {
 }
 
 /* Colores para selectores */
+.ship[data-length="6"] { border-left-color: rgb(67, 168, 67) }
 .ship[data-length="5"] { border-left-color: #FF6B6B; }
 .ship[data-length="4"] { border-left-color: #4ECDC4; }
 .ship[data-length="3"] { border-left-color: #45B7D1; }
@@ -153,9 +155,10 @@ body {
     z-index: 1000;
 }
 
-/* Ajustes para móviles */
+/* Ajustes para móviles, El código dentro de estas llaves solo se aplicará cuando el ancho de la pantalla sea menor o igual a 576px, */
 @media (max-width: 576px) {
     .board-cell {
+        /*  Reduce el ancho mínimo de las celdas para que quepan en pantallas pequeñas*/
         min-width: 12px;
         font-size: 10px;
     }
