@@ -23,9 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Configuración de barcos
 
-    const shipsToPlace = [{ name: "Destructor", length: 1, emoji: "⚓", placed: false },
-        { name: "Submarino", length: 2, emoji: "🚤", placed: false },
+    const shipsToPlace = [{ name: "Submarino", length: 2, emoji: "⚓", placed: false },
+        { name: "Submarino2", length: 2, emoji: "⚓", placed: false },
         { name: "Crucero", length: 3, emoji: "🛳", placed: false },
+        { name: "Crucero2", length: 3, emoji: "🛳", placed: false },
         { name: "Acorazado", length: 4, emoji: "⛴", placed: false },
         { name: "Portaaviones", length: 5, emoji: "🚢", placed: false },
     ];
@@ -331,11 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Ajustar tamaño de fuente
                 cell.style.fontSize = `${Math.max(cellSize * 0.5, 10)}px`;
                 
-                // Mostrar barcos (opcional, normalmente el tablero del oponente no muestra barcos)
+                // Mostrar barcos (para debug, normalmente no se muestran)
                 if (boardState[row][col] !== 0) {
                     const shipType = boardState[row][col];
-                    const ship = shipsToPlace.find(s => s.length === shipType);
-                    if (ship) {
+                    // Buscar por índice (shipType - 1) en lugar de por longitud
+                    if (shipType - 1 < shipsToPlace.length) {
+                        const ship = shipsToPlace[shipType - 1];
                         cell.innerHTML = `<div class="ship-emoji">${ship.emoji}</div>`;
                         cell.classList.add('occupied');
                     }
@@ -353,6 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Crear un tablero vacío del mismo tamaño
         const boardSize = playerBoardState.length;
         const opponentBoard = Array(boardSize).fill().map(() => Array(boardSize).fill(0));
+
+
         
         // Analizar los barcos del jugador para replicar la misma cantidad y tamaños
         const playerShips = analyzePlayerShips();
@@ -385,41 +389,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        
+        console.log(opponentBoard)
         return opponentBoard;
     }
-            // Función para analizar los barcos del jugador
-            function analyzePlayerShips() {
-                return shipsToPlace.map((ship, index) => ({
-                    type: index + 1,  // Los tipos empiezan en 1
-                    size: ship.length
-                }));
-            }
+
+
+    function analyzePlayerShips() {
+        return shipsToPlace.map((ship, index) => ({
+            type: index + 1,  // Mantener consistencia con los índices del jugador
+            size: ship.length,
+            name: ship.name,
+            emoji: ship.emoji
+        }));
+    }
         
-            // Función para verificar si se puede colocar un barco
-            function canPlaceShip(board, startRow, startCol, length, isVertical) {
-                // Verificar que no salga del tablero
-                if (isVertical) {
-                    if (startRow + length > board.length) return false;
-                } else {
-                    if (startCol + length > board[0].length) return false;
+    // Función para verificar si se puede colocar un barco
+    function canPlaceShip(board, startRow, startCol, length, isVertical) {
+        // Verificar que no salga del tablero
+        if (isVertical) {
+            if (startRow + length > board.length) return false;
+        } else {
+            if (startCol + length > board[0].length) return false;
+        }
+        
+        // Verificar que no colisione con otros barcos
+        for (let i = 0; i < length; i++) {
+            const row = isVertical ? startRow + i : startRow;
+            const col = isVertical ? startCol : startCol + i;
+            
+            // Verificar la celda y sus adyacentes
+            for (let r = Math.max(0, row - 1); r <= Math.min(board.length - 1, row + 1); r++) {
+                for (let c = Math.max(0, col - 1); c <= Math.min(board[0].length - 1, col + 1); c++) {
+                    if (board[r][c] !== 0) return false;
                 }
-                
-                // Verificar que no colisione con otros barcos
-                for (let i = 0; i < length; i++) {
-                    const row = isVertical ? startRow + i : startRow;
-                    const col = isVertical ? startCol : startCol + i;
-                    
-                    // Verificar la celda y sus adyacentes
-                    for (let r = Math.max(0, row - 1); r <= Math.min(board.length - 1, row + 1); r++) {
-                        for (let c = Math.max(0, col - 1); c <= Math.min(board[0].length - 1, col + 1); c++) {
-                            if (board[r][c] !== 0) return false;
-                        }
-                    }
-                }
-                
-                return true;
             }
+        }
+        
+        return true;
+    }
 
     // Modificar el evento click del botón de inicio
     startGameBtn.addEventListener('click', async () => {
