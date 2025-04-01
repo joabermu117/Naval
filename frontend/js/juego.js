@@ -107,22 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     'weather-night'
                 );
             });
-            
-            // Determinar si es de noche (para el fondo del tablero)
-            const isNight = isCurrentlyNight();
-            if (isNight) {
-                playerBoard.classList.add('weather-night');
-                opponentBoard.classList.add('weather-night');
-            }
-            
+        
             // Añadir clase según la condición
             switch(condition) {
                 case 'clear':
                     weatherCard.classList.add('weather-sunny');
-                    if (!isNight) {
-                        playerBoard.classList.add('weather-sunny');
-                        opponentBoard.classList.add('weather-sunny');
-                    }
+                    playerBoard.classList.add('weather-sunny');
+                    opponentBoard.classList.add('weather-sunny');
                     break;
                 case 'rain':
                 case 'drizzle':
@@ -141,14 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     playerBoard.classList.add('weather-stormy');
                     opponentBoard.classList.add('weather-stormy');
                     break;
-                case 'mist':
-                case 'smoke':
-                case 'haze':
-                case 'dust':
-                case 'fog':
-                case 'sand':
-                case 'ash':
-                case 'squall':
                 case 'tornado':
                     weatherCard.classList.add('weather-foggy');
                     playerBoard.classList.add('weather-foggy');
@@ -160,16 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Función para determinar si es de noche (puedes adaptarla según tu API del clima)
-        function isCurrentlyNight() {
-            if (!weatherData) return false;
-            
-            const now = new Date();
-            const sunrise = new Date(weatherData.sys.sunrise * 1000);
-            const sunset = new Date(weatherData.sys.sunset * 1000);
-            
-            return now < sunrise || now > sunset;
-        }
+
     
         // Convertir dirección del viento
         function getWindDirection(degrees) {

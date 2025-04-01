@@ -136,7 +136,7 @@
 
 /* Fondos para los tableros según el clima */
 .game-board.weather-sunny {
-    background-image: url('https://cdn.pixabay.com/photo/2020/08/28/11/10/ocean-5524264_1280.jpg'); /* soleado bg */
+    background-image: url('https://media.vandal.net/i/2880x2160/31617/sea-of-thieves-20171211105420_3.jpg'); /* soleado bg */
     background-size: cover;
     background-position: center;
     background-image: no-repeat;
@@ -150,7 +150,7 @@
 }
 
 .game-board.weather-cloudy {
-    background-image: url('https://cdn.pixabay.com/photo/2017/08/02/09/40/dark-2570442_1280.jpg'); /* Nublado bg */
+    background-image:url('https://i.pinimg.com/736x/25/f7/03/25f703a8eba5d95ef0119a27a3ac6442.jpg') ;
     background-size: cover;
     background-position: center;
     background-image: no-repeat;
@@ -178,12 +178,7 @@
     background-image: no-repeat;
 }
 
-.game-board.weather-night {
-    background-image: url('https://i.pinimg.com/736x/cb/45/b9/cb45b92557e49030c34030756513ca15.jpg'); /* Imagen de niebla */
-    background-size: cover;
-    background-position: center;
-    background-image: no-repeat;
-}
+
 
 /* Asegurar que las celdas sean visibles sobre los nuevos fondos */
 .board-cell {
