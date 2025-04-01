@@ -61,7 +61,42 @@
             </div>
         </div>
 
-
+        <!-- Sección principal: Tableros de juego -->
+        <div class="row boards-section">
+            <!-- Contenedor del tablero del jugador (ocupa 5 columnas en pantallas grandes) -->
+            <div class="col-lg-5 board-wrapper">
+                <h3 class="board-title">Tu Flota</h3> <!-- Título del tablero -->
+                <!-- Tablero del jugador (se genera dinámicamente con JavaScript) -->
+                <div id="playerBoard" class="game-board disabled-board"></div>
+            </div>
+            
+            <!-- Sección del clima (ocupa 2 columnas en pantallas grandes) -->
+            <div class="col-lg-2 d-flex align-items-center justify-content-center weather-section">
+                <!-- Tarjeta de Bootstrap para mostrar información meteorológica -->
+                <div id="weatherInfo" class="card">
+                    <!-- Encabezado de la tarjeta -->
+                    <div class="card-header">
+                        <h4 class="board-title m-0">Información del Clima</h4> <!-- Título -->
+                    </div>
+                    <!-- Cuerpo de la tarjeta -->
+                    <div class="card-body">
+                        <div class="weather-details">
+                            <!-- Elementos para mostrar información dinámica del clima -->
+                            <p id="locationName" class="fw-bold mb-2"></p> <!-- Nombre de la ubicación -->
+                            <p id="temperatureInfo" class="mb-1 small"></p> <!-- Información de temperatura -->
+                            <p id="conditionInfo" class="small"></p> <!-- Condiciones climáticas -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenedor del tablero del oponente (ocupa 5 columnas en pantallas grandes) -->
+            <div class="col-lg-5 board-wrapper">
+                <h3 class="board-title">Flota Enemiga</h3> <!-- Título del tablero -->
+                <!-- Tablero del oponente (se genera dinámicamente con JavaScript) -->
+                <div id="opponentBoard" class="game-board"></div>
+            </div>
+        </div>
         
 
         <!-- Sección de mensajes del juego -->
