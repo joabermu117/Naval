@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const conditionInfo = document.getElementById('conditionInfo');
     const playerBoard = document.getElementById('playerBoard');
     const opponentBoard = document.getElementById('opponentBoard');
+    const player = getPlayerData() || 'Anónimo';
 
     // Variables de estado del juego
     let boardSize = 10;
@@ -50,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error('Datos del tablero no encontrados.');
         }
 
-
+            console.log(player);
+            
             // Configurar datos del juego
             boardSize = playerBoardState.length;
             playerBoard.innerHTML = gameData.board;
@@ -234,14 +236,14 @@ function handleCellClick(row, col) {
     }
     // Verificar si el disparo estuvo cerca de un barco
     else if (isNearShip(row, col, 'opponent')) {
-        cell.innerHTML = '💧';
+        cell.innerHTML = '⚠️';
         cell.classList.add('near-hit');
         addGameMessage("¡Estuvo cerca! El disparo cayó al lado de un barco.");
         gameStats.player.nearHits++;
     }
     // Disparo al agua
     else {
-        cell.innerHTML = '❌';
+        cell.innerHTML = '💧';
         cell.classList.add('miss');
         addGameMessage("Agua. No has impactado ningún barco.");
         gameStats.player.misses++;
@@ -312,13 +314,13 @@ function updateStatsDisplay() {
                 gameStats.opponent.hits++;
             }
             else if (isNearShip(row, col, 'player')) {
-                cell.innerHTML = '💧';
+                cell.innerHTML = '⚠️';
                 cell.classList.add('near-hit');
                 addGameMessage("El oponente estuvo cerca de uno de tus barcos.");
                 gameStats.opponent.nearHits++;
             }
             else {
-                cell.innerHTML = '❌';
+                cell.innerHTML = '💧';
                 cell.classList.add('miss');
                 addGameMessage("El oponente ha disparado al agua.");
                 gameStats.opponent.misses++;
@@ -402,8 +404,8 @@ function isShipSunk(shipId, player = 'opponent') {
                 const adjacentCell = boardToCheck.querySelector(
                     `.board-cell[data-row="${newRow}"][data-col="${newCol}"]`
                 );
-                return adjacentCell && adjacentCell.classList.contains('occupied') && 
-                       !adjacentCell.classList.contains('hit');
+                return adjacentCell && adjacentCell.classList.contains('occupied') ||
+                       adjacentCell.classList.contains('hit');
             }
             return false;
         });
@@ -466,7 +468,7 @@ function isShipSunk(shipId, player = 'opponent') {
         
         document.body.appendChild(victoryOverlay);
         
-        document.getElementById('showStatsBtn').addEventListener('click', showGameStatsModal);
+        document.getElementById('showStatsBtn').addEventListener('click', sendGameStatsToBackend);
         document.getElementById('playAgainBtn').addEventListener('click', () => {
             window.location.href = 'personalizar.html';
         });
@@ -476,21 +478,24 @@ function isShipSunk(shipId, player = 'opponent') {
 
     // Enviar estadísticas al backend
     function sendGameStatsToBackend(winner) {
-        const nickName = localStorage.getItem('playerNickname') || 'Anónimo';
-        const countryCode = localStorage.getItem('playerCountry') || 'co';
+        const nickName = player.nick_name || 'Anónimo';
+        const countryCode = player.country_code || 'XX';
         
         // Calcular puntaje (puedes ajustar esta fórmula)
         const score = gameStats.player.hits * 10 -
                      gameStats.player.nearHits * 3 - 
                      gameStats.player.misses * 1;
-        
+    
         const gameDuration = Math.floor((Date.now() - gameStartTime) / 1000); // en segundos
-        
+        console.log('Puntuacion:', score);
         const postData = {
+
             nick_name: nickName,
             score: score,
             country_code: countryCode,
         };
+
+        console.log('Datos a enviar:', postData);
         
         fetch('http://127.0.0.1/score-recorder', {
             method: 'POST',

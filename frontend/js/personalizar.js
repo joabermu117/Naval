@@ -338,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Buscar por índice (shipType - 1) en lugar de por longitud
                     if (shipType - 1 < shipsToPlace.length) {
                         const ship = shipsToPlace[shipType - 1];
-                        cell.innerHTML = `<div class="ship-emoji">${ship.emoji}</div>`;
                         cell.classList.add('occupied');
                     }
                 }

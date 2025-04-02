@@ -93,10 +93,7 @@
     color: white;
 }
 
-.board-cell.miss {
-    background-color: #0dcaf0;
-    color: white;
-}
+
 
 .board-cell.occupied {
     background-color: #6c757d;
