@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerBoard = document.getElementById('playerBoard');
     const opponentBoard = document.getElementById('opponentBoard');
     const player = getPlayerData() || 'Anónimo';
+    const BACKEND_URL = "http://localhost:5000"; 
+
+    // Configuración de Gemini AI (agregar al inicio del código)
+    
 
     // Variables de estado del juego
     let boardSize = 10;
@@ -469,9 +473,14 @@ function isShipSunk(shipId, player = 'opponent') {
         document.body.appendChild(victoryOverlay);
         
         document.getElementById('showStatsBtn').addEventListener('click', sendGameStatsToBackend);
+        document.getElementById('showStatsBtn').addEventListener('click', showStats);
         document.getElementById('playAgainBtn').addEventListener('click', () => {
             window.location.href = 'personalizar.html';
         });
+    }
+
+    function showStats(params) {
+        
     }
 
 
@@ -481,35 +490,36 @@ function isShipSunk(shipId, player = 'opponent') {
         const nickName = player.nick_name || 'Anónimo';
         const countryCode = player.country_code || 'XX';
         
-        // Calcular puntaje (puedes ajustar esta fórmula)
         const score = gameStats.player.hits * 10 -
                      gameStats.player.nearHits * 3 - 
                      gameStats.player.misses * 1;
     
-        const gameDuration = Math.floor((Date.now() - gameStartTime) / 1000); // en segundos
-        console.log('Puntuacion:', score);
         const postData = {
-
             nick_name: nickName,
             score: score,
             country_code: countryCode,
         };
-
-        console.log('Datos a enviar:', postData);
-        
-        fetch('http://127.0.0.1/score-recorder', {
+    
+        fetch(`${BACKEND_URL}/score-recorder`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(postData)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
         .then(data => {
             console.log('Puntaje enviado:', data);
+            // Mostrar confirmación al usuario
         })
         .catch(error => {
             console.error('Error al enviar puntaje:', error);
+            // Mostrar error al usuario (puedes usar un toast o alerta)
         });
     }
 
