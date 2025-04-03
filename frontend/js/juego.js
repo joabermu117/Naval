@@ -593,6 +593,12 @@ function showStatsModal() {
         }
     }
 
+    document
+    .getElementById("btnOpenRanking")
+    .addEventListener("click", function () {
+      window.RankingModal.open();
+    });
+
     // Iniciar el juego
     initGame();
     setupEventListeners();
