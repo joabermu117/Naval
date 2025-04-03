@@ -28,7 +28,7 @@
         "country_code": "jp"
     },
     "Felipe14": {
-        "score": 0,
+        "score": 1900,
         "country_code": "AF"
     },
     "diehk": {
@@ -50,5 +50,13 @@
     "jjjj": {
         "score": 0,
         "country_code": "AF"
+    },
+    "An\u00f3nimo": {
+        "score": 380,
+        "country_code": "XX"
+    },
+    "redo08": {
+        "score": 190,
+        "country_code": "AO"
     }
 }
