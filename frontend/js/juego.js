@@ -14,17 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const opponentBoard = document.getElementById('opponentBoard');
     const player = getPlayerData() || 'Anónimo';
     const BACKEND_URL = "http://localhost:5000"; 
-<<<<<<< HEAD
     
     // Variables de estado para la IA del Oponente
     let opponentMode = 'random'; // Modos: 'random', 'hunting', 'near_hit_search'
     let targetQueue = []; // Cola de coordenadas {row, col} a priorizar
     let huntingInfo = null;
-=======
 
     // Configuración de Gemini AI (agregar al inicio del código)
     
->>>>>>> 2b2d4edfe0efdd7f6d850b98f171b6baf1144836
 
     // Variables de estado del juego
     let boardSize = 10;
@@ -287,7 +284,6 @@ function updateStatsDisplay() {
     }
 }
     
-<<<<<<< HEAD
 
     // Turno del oponente (IA)
     function opponentTurn() {
@@ -348,8 +344,6 @@ function updateStatsDisplay() {
         }, 15);
     }
 
-=======
->>>>>>> 1d2fbe29ee28d7dba21d6349e1becbd678c900da
     // Verificar si un barco ha sido hundido
    
 function isShipSunk(shipId, player = 'opponent') {
