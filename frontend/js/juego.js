@@ -283,69 +283,8 @@ function updateStatsDisplay() {
         `;
     }
 }
-    
 
-    // Turno del oponente (IA)
-    function opponentTurn() {
-        if (gamePhase !== 'opponent-turn') return;
-        
-        let row, col, cell;
-        let validMove = false;
-        
-        // Estrategia simple de IA: disparar aleatoriamente
-        while (!validMove) {
-            row = Math.floor(Math.random() * boardSize);
-            col = Math.floor(Math.random() * boardSize);
-            cell = playerBoard.querySelector(`.board-cell[data-row="${row}"][data-col="${col}"]`);
-            
-            if (!cell.classList.contains('miss') && !cell.classList.contains('hit')) {
-                validMove = true;
-            }
-        }
-        
-        // Mostrar mensaje del turno del oponente
-        addGameMessage("Turno del oponente...", true);
-        
-        // Simular un pequeño retraso para el turno de la IA
-        setTimeout(() => {
-            if (cell.classList.contains('occupied')) {
-                cell.innerHTML = '💥';
-                cell.classList.add('hit');
-                
-                const shipId = cell.dataset.ship;
-                if (isShipSunk(shipId)) {
-                    addGameMessage(`¡El oponente ha hundido tu ${getShipName(shipId)}!`);
-                    markSunkShip(shipId);
-                    gameStats.opponent.shipsSunk++;
-                } else {
-                    addGameMessage("¡El oponente ha impactado en uno de tus barcos!");
-                }
-                gameStats.opponent.hits++;
-            }
-            else if (isNearShip(row, col, 'player')) {
-                cell.innerHTML = '⚠️';
-                cell.classList.add('near-hit');
-                addGameMessage("El oponente estuvo cerca de uno de tus barcos.");
-                gameStats.opponent.nearHits++;
-            }
-            else {
-                cell.innerHTML = '💧';
-                cell.classList.add('miss');
-                addGameMessage("El oponente ha disparado al agua.");
-                gameStats.opponent.misses++;
-            }
-            
-            // Volver al turno del jugador
-            gamePhase = 'player-turn';
-            addGameMessage("Es tu turno. ¡Elige una coordenada para atacar!");
-            
-            // Verificar si el juego ha terminado
-            checkGameEnd();
-        }, 15);
-    }
-
-    // Verificar si un barco ha sido hundido
-   
+// Verificar si un barco ha sido hundido
 function isShipSunk(shipId, player = 'opponent') {
     const boardState = player === 'opponent' ? opponentBoardState : playerBoardState;
     const boardElement = player === 'opponent' ? opponentBoard : playerBoard;
@@ -750,390 +689,392 @@ function setupEventListeners() {
         });
     }
     
-    // Configurar el botón de ranking
-
-    function opponentTurn() {
-        if (gamePhase !== 'opponent-turn') return;
-    
-        addGameMessage("Turno del oponente...", true);
-    
-        let targetRow, targetCol;
-        let validMoveFound = false;
-        let attempts = 0; // Contador para evitar bucles infinitos
-        const maxAttempts = boardSize * boardSize * 2; // Un límite generoso
-    
-        // --- Estrategia de Selección de Objetivo ---
-        while (!validMoveFound && attempts < maxAttempts) {
-            attempts++;
-            let potentialTarget = chooseNextTarget(); // Intenta obtener un objetivo de la cola/caza
-    
-            if (potentialTarget) {
-                targetRow = potentialTarget.row;
-                targetCol = potentialTarget.col;
-            } else {
-                // Si no hay objetivo prioritario (modo random o cola vacía), elige al azar
-                opponentMode = 'random'; // Asegura estar en modo aleatorio
-                huntingInfo = null;
-                targetQueue = []; // Limpia la cola por si acaso
-                targetRow = Math.floor(Math.random() * boardSize);
-                targetCol = Math.floor(Math.random() * boardSize);
-            }
-    
-            // Verifica si la celda elegida es válida y no ha sido atacada
-            if (isValidAndUntouched(targetRow, targetCol)) {
-                validMoveFound = true;
-            } else if (potentialTarget) {
-                 // Si el objetivo de la cola era inválido, simplemente lo ignoramos
-                 // chooseNextTarget() ya lo habrá eliminado de la cola al hacer shift()
-                 console.log(`AI: Target ${targetRow},${targetCol} from queue was invalid. Trying next.`);
-            }
-             // Si el intento aleatorio falla, el bucle while continuará
-        }
-        // --- Fin Selección de Objetivo ---
-    
-        if (!validMoveFound) {
-            console.error("AI Error: No valid move found after max attempts. Skipping turn.");
-            addGameMessage("Error de la IA. Omitiendo turno.", true);
-             // Volver al turno del jugador para evitar bloqueo
-             gamePhase = 'player-turn';
-             addGameMessage("Es tu turno. ¡Elige una coordenada para atacar!");
-             checkGameEnd();
-            return; // Salir si no se encontró movimiento válido
-        }
-    
-        // Pequeño retraso para simular pensamiento y ejecución
-        setTimeout(() => {
-            const cell = playerBoard.querySelector(`.board-cell[data-row="${targetRow}"][data-col="${targetCol}"]`);
-            if (!cell) {
-                console.error(`AI Error: Cell not found at ${targetRow},${targetCol}`);
-                // Recuperarse volviendo al turno del jugador
-                gamePhase = 'player-turn';
-                addGameMessage("Error interno. Es tu turno.");
-                checkGameEnd();
-                return;
-            }
-    
-            let shotResult = 'miss'; // Resultado por defecto
-            let shipId = null; // ID del barco impactado
-    
-            // Evalúa el disparo
-            if (cell.classList.contains('occupied')) { // ¡Impacto!
-                cell.innerHTML = '💥';
-                cell.classList.remove('occupied'); // Quita 'occupied' para evitar re-evaluaciones
-                cell.classList.add('hit');
-                gameStats.opponent.hits++;
-                shipId = cell.dataset.ship; // Asegúrate que 'data-ship' se asigna al crear el tablero del jugador
-                shotResult = 'hit';
-    
-                // Verifica si el barco se hundió
-                if (isShipSunk(shipId, 'player')) { // Pasamos 'player' para chequear el tablero correcto
-                    markSunkShip(shipId, 'player'); // Pasamos 'player'
-                    addGameMessage(`¡El oponente ha hundido tu ${getShipName(shipId)}!`);
-                    gameStats.opponent.shipsSunk++;
-                    shotResult = 'sunk';
-                } else {
-                    addGameMessage("¡Impacto! El oponente golpeó uno de tus barcos.");
-                }
-    
-            } else if (isNearShip(targetRow, targetCol, 'player')) { // ¡Cerca! (Pasamos 'player')
-                cell.innerHTML = '⚠️';
-                cell.classList.add('near-hit');
-                addGameMessage("El oponente estuvo cerca de uno de tus barcos.");
-                gameStats.opponent.nearHits++;
-                shotResult = 'near-hit';
-            } else { // ¡Agua!
-                cell.innerHTML = '💧';
-                cell.classList.add('miss');
-                addGameMessage("El oponente ha disparado al agua.");
-                gameStats.opponent.misses++;
-                shotResult = 'miss';
-            }
-    
-            // Actualiza el estado de la IA basado en el resultado
-            updateAIState(targetRow, targetCol, shotResult, shipId);
-    
-            // Devuelve el turno al jugador y verifica fin de juego
-            gamePhase = 'player-turn';
-            // Solo mostrar mensaje de turno si el juego no ha terminado
-            if (gamePhase !== 'game-over') {
-                 addGameMessage("Es tu turno. ¡Elige una coordenada para atacar!");
-            }
-            checkGameEnd(); // Comprobar si el juego termina después del movimiento del oponente
-    
-        }, 1000 + Math.random() * 1000); // Delay entre 1 y 2 segundos
-    }
-
-    function isValidAndUntouched(row, col) {
-        // Verifica límites del tablero
-        if (row < 0 || row >= boardSize || col < 0 || col >= boardSize) {
-            return false;
-        }
-        // Verifica si la celda existe y no ha sido atacada en el tablero del JUGADOR
-        const cell = playerBoard.querySelector(`.board-cell[data-row="${row}"][data-col="${col}"]`);
-        if (!cell || cell.classList.contains('miss') || cell.classList.contains('hit') || cell.classList.contains('sunk') || cell.classList.contains('near-hit')) {
-            return false; // Ya atacada (miss, hit, sunk, near-hit) o no encontrada
-        }
-        return true; // Válida y no atacada
-    }
-    
-    function getAdjacentCells(target, includeDiagonals = false) {
-        const { row, col } = target;
-        const neighbors = [];
-        // Direcciones: Arriba, Abajo, Izquierda, Derecha (y diagonales si includeDiagonals es true)
-        const directions = includeDiagonals
-            ? [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]] // 8 Dirs
-            : [[-1, 0], [1, 0], [0, -1], [0, 1]]; // 4 Dirs (N, S, W, E)
-    
-        directions.forEach(([dr, dc]) => {
-            const nr = row + dr;
-            const nc = col + dc;
-            // No necesitamos verificar validez aquí, solo generar coordenadas
-            neighbors.push({ row: nr, col: nc });
-        });
-        return neighbors;
-    }
-    
-    function addValidNeighborsToQueue(target, queue, includeDiagonals = false, specificDirections = null) {
-        let potentialNeighbors = getAdjacentCells(target, includeDiagonals);
-    
-        // Filtrar por direcciones específicas si estamos cazando
-        if (specificDirections && huntingInfo) {
-            const lastKnownHit = huntingInfo.lastHit || huntingInfo.firstHit;
-             potentialNeighbors = potentialNeighbors.filter(n => {
-                const dr = n.row - lastKnownHit.row;
-                const dc = n.col - lastKnownHit.col;
-                 if (dr === -1 && dc === 0 && specificDirections.includes('up')) return true;
-                 if (dr === 1 && dc === 0 && specificDirections.includes('down')) return true;
-                 if (dr === 0 && dc === -1 && specificDirections.includes('left')) return true;
-                 if (dr === 0 && dc === 1 && specificDirections.includes('right')) return true;
-                 // No añadir diagonales cuando se caza en una dirección específica por defecto
-                 return false;
-            });
-        }
-    
-        const currentQueueSet = new Set(queue.map(JSON.stringify)); // Para evitar duplicados rápidos
-        const newTargets = [];
-    
-        potentialNeighbors.forEach(neighbor => {
-            if (isValidAndUntouched(neighbor.row, neighbor.col)) {
-                 const neighborStr = JSON.stringify(neighbor);
-                 if (!currentQueueSet.has(neighborStr)) { // Evita añadir si ya está en la cola
-                    newTargets.push(neighbor);
-                    currentQueueSet.add(neighborStr); // Añade al set para futuras comprobaciones en este bucle
-                }
-            }
-        });
-    
-        // Añadir los nuevos objetivos al PRINCIPIO de la cola para priorizarlos
-        return [...newTargets, ...queue];
-        // Alternativa: Añadir al final: return [...queue, ...newTargets];
-    }
-    
-    
-    function chooseNextTarget() {
-        // Siempre prioriza la cola si no está vacía
-        while (targetQueue.length > 0) {
-            const nextTarget = targetQueue.shift(); // Obtiene y elimina el primer elemento
-            if (isValidAndUntouched(nextTarget.row, nextTarget.col)) {
-                 console.log(`AI: Choosing target from queue: ${nextTarget.row},${nextTarget.col}. Mode: ${opponentMode}`);
-                return nextTarget; // Devuelve el primer objetivo válido encontrado
-            }
-             console.log(`AI: Target ${nextTarget.row},${nextTarget.col} from queue was invalid (already hit/missed). Discarding.`);
-             // Si no era válido, el bucle while cogerá el siguiente de la cola
-        }
-    
-        // Si la cola está vacía, cambia a modo aleatorio y devuelve null
-         if (opponentMode !== 'random') {
-            console.log("AI: Target queue empty or exhausted. Switching to random mode.");
-            opponentMode = 'random';
-            huntingInfo = null; // Limpia información de caza
-        }
-        return null; // Indica que se debe elegir un objetivo aleatorio
-    }
-    
-    
-    function updateAIState(row, col, result, hitShipId) {
-        const currentTarget = { row, col };
-    
-        if (result === 'sunk') {
-            addGameMessage(`AI: Barco ${getShipName(hitShipId)} hundido. Limpiando objetivos relacionados.`);
-            huntingInfo = null; // Se acabó la caza de este barco
-            // Limpiar la cola de objetivos adyacentes al barco recién hundido
-            targetQueue = filterQueueAfterSinking(hitShipId, targetQueue);
-            console.log(`AI: Queue after sinking ship ${hitShipId}:`, targetQueue.length);
-    
-            // Si la cola queda vacía, modo aleatorio. Si no, sigue con lo que haya.
-            if (targetQueue.length === 0) {
-                opponentMode = 'random';
-                console.log("AI: Queue empty after sinking. Switching to random.");
-            } else {
-                // Si quedan objetivos, probablemente sean de 'near-hit' o de otra caza incompleta
-                // Mantenemos el modo que sea ('hunting' o 'near_hit_search') hasta que la cola se vacíe
-                 console.log(`AI: Targets remain in queue (${targetQueue.length}). Continuing in mode ${opponentMode}.`);
-            }
-    
-        } else if (result === 'hit') {
-            if (opponentMode !== 'hunting') {
-                 // Primer impacto en este barco o transición desde 'near_hit_search'
-                console.log("AI: First hit! Switching to hunting mode.");
-                opponentMode = 'hunting';
-                huntingInfo = {
-                    firstHit: currentTarget,
-                    lastHit: currentTarget,
-                    possibleDirections: ['up', 'down', 'left', 'right'] // Inicialmente todo es posible
-                };
-                 // Añadir vecinos (solo ortogonales) a la cola
-                targetQueue = addValidNeighborsToQueue(currentTarget, targetQueue, false); // false = no diagonales
-            } else {
-                // Impacto consecutivo mientras se cazaba
-                 console.log("AI: Consecutive hit while hunting.");
-                 refineHuntingDirection(currentTarget); // Intenta deducir la dirección
-                 huntingInfo.lastHit = currentTarget; // Actualiza el último impacto
-                 // Añadir vecinos en las direcciones posibles (si se han reducido)
-                 targetQueue = addValidNeighborsToQueue(currentTarget, targetQueue, false, huntingInfo.possibleDirections);
-            }
-            // Asegurarse de que la celda recién golpeada no esté en la cola
-            targetQueue = targetQueue.filter(t => !(t.row === row && t.col === col));
-            console.log(`AI: Queue after hit at ${row},${col}:`, targetQueue.length, "Directions:", huntingInfo?.possibleDirections);
-    
-    
-        } else if (result === 'near-hit') {
-             console.log("AI: Near-hit detected.");
-             // Añadir TODOS los vecinos (incluyendo diagonales) a la cola si no estamos ya cazando
-             if (opponentMode !== 'hunting') {
-                 targetQueue = addValidNeighborsToQueue(currentTarget, targetQueue, true); // true = incluye diagonales
-                 if (opponentMode === 'random') {
-                     opponentMode = 'near_hit_search'; // Cambia a buscar cerca si estaba en aleatorio
-                      console.log("AI: Switching to near-hit search mode.");
-                 }
-             } else {
-                 console.log("AI: Ignored near-hit queue add because already hunting.");
-                  // Opcional: Podrías añadir vecinos de near-hit con menor prioridad si estás cazando
-             }
-             // Asegurarse de que la celda 'near-hit' no esté en la cola
-             targetQueue = targetQueue.filter(t => !(t.row === row && t.col === col));
-             console.log(`AI: Queue after near-hit at ${row},${col}:`, targetQueue.length);
-    
-    
-        } else if (result === 'miss') {
-             console.log("AI: Missed.");
-             if (opponentMode === 'hunting') {
-                // Un fallo mientras se caza ayuda a eliminar direcciones
-                eliminateHuntingDirection(currentTarget);
-                console.log(`AI: Miss while hunting. Possible directions left: ${huntingInfo?.possibleDirections?.join(', ')}`);
-                 // Si después de eliminar dirección, la cola de caza se vacía Y no quedan direcciones
-                 if (huntingInfo && huntingInfo.possibleDirections.length === 0 && targetQueue.length === 0) {
-                     console.log("AI: Hunting failed (no more directions/targets). Switching to random.");
-                     opponentMode = 'random';
-                     huntingInfo = null;
-                 }
-            }
-            // Asegurarse de que la celda fallida no esté en la cola
-            targetQueue = targetQueue.filter(t => !(t.row === row && t.col === col));
-             // Si la cola general se vacía, volver a aleatorio
-             if (targetQueue.length === 0 && opponentMode !== 'random') {
-                 console.log("AI: Queue empty after miss. Switching to random mode.");
-                 opponentMode = 'random';
-                 huntingInfo = null;
-             }
-        }
-    
-        // Opcional: Limitar tamaño de la cola para evitar que crezca demasiado
-         if (targetQueue.length > boardSize * 2) {
-             targetQueue = targetQueue.slice(0, boardSize * 2); // Mantén solo los primeros N objetivos
-         }
-        // console.log("AI Final State:", { opponentMode, huntingInfo, queueLength: targetQueue.length });
-        // console.log("Queue:", targetQueue.map(t=>`[${t.row},${t.col}]`).join(' '));
-    }
-    
-    
-    function filterQueueAfterSinking(sunkShipId, queue) {
-        const sunkCellsCoords = [];
-        // Encuentra todas las celdas del barco hundido en el tablero del JUGADOR
-        for (let r = 0; r < boardSize; r++) {
-            for (let c = 0; c < boardSize; c++) {
-                const cell = playerBoard.querySelector(`.board-cell[data-row="${r}"][data-col="${c}"]`);
-                // Comprueba si tiene la clase 'sunk' Y si su data-ship coincide
-                if (cell && cell.classList.contains('sunk') && cell.dataset.ship === sunkShipId) {
-                     sunkCellsCoords.push({ row: r, col: c });
-                }
-                 // Alternativa si playerBoardState está disponible y es fiable:
-                 // if (playerBoardState[r][c] === parseInt(sunkShipId)) { // Cuidado con tipos string/number
-                 //    sunkCellsCoords.push({ row: r, col: c });
-                 // }
-            }
-        }
-    
-        // Crea un Set con las coordenadas adyacentes (incl. diagonales) a CUALQUIER parte del barco hundido
-        const cellsNearSunkShip = new Set();
-        sunkCellsCoords.forEach(sunkCell => {
-            // Añadir la propia celda hundida (por si estaba en la cola)
-            cellsNearSunkShip.add(JSON.stringify(sunkCell));
-            // Añadir todas las vecinas
-            const neighbors = getAdjacentCells(sunkCell, true); // true = incluye diagonales
-            neighbors.forEach(n => cellsNearSunkShip.add(JSON.stringify(n)));
-        });
-    
-        // Filtra la cola original, manteniendo solo los objetivos que NO están en el Set
-        return queue.filter(target => !cellsNearSunkShip.has(JSON.stringify(target)));
-    }
-    
-    
-    function refineHuntingDirection(hitTarget) {
-        // Esta función intenta deducir si el barco es horizontal o vertical
-        if (!huntingInfo || !huntingInfo.firstHit || huntingInfo.firstHit.row === hitTarget.row && huntingInfo.firstHit.col === hitTarget.col) {
-            // No hay suficiente información (es el primer o segundo hit)
-            return;
-        }
-    
-        const first = huntingInfo.firstHit;
-        const current = hitTarget;
-    
-        if (first.row === current.row) { // Posiblemente horizontal
-            console.log("AI Refine: Detected horizontal possibility.");
-            huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(dir => dir === 'left' || dir === 'right');
-        } else if (first.col === current.col) { // Posiblemente vertical
-            console.log("AI Refine: Detected vertical possibility.");
-            huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(dir => dir === 'up' || dir === 'down');
-        }
-        // Si no es ni horizontal ni vertical respecto al primer hit (¿imposible con 2+ hits?), no hacemos nada.
-    
-        // Eliminar direcciones bloqueadas por bordes basado en el ÚLTIMO hit
-         if (current.col === 0) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'left');
-         if (current.col === boardSize - 1) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'right');
-         if (current.row === 0) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'up');
-         if (current.row === boardSize - 1) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'down');
-    }
-    
-    
-    function eliminateHuntingDirection(missTarget) {
-        // Elimina una dirección basada en dónde ocurrió el fallo relativo al último impacto
-        if (!huntingInfo || !huntingInfo.lastHit) return;
-    
-        const lastHit = huntingInfo.lastHit;
-        const miss = missTarget;
-        let eliminatedDir = null;
-    
-        if (miss.row < lastHit.row && miss.col === lastHit.col) eliminatedDir = 'up';
-        else if (miss.row > lastHit.row && miss.col === lastHit.col) eliminatedDir = 'down';
-        else if (miss.col < lastHit.col && miss.row === lastHit.row) eliminatedDir = 'left';
-        else if (miss.col > lastHit.col && miss.row === lastHit.row) eliminatedDir = 'right';
-    
-        if (eliminatedDir && huntingInfo.possibleDirections.includes(eliminatedDir)) {
-             console.log(`AI Eliminate: Eliminating direction ${eliminatedDir} due to miss at ${miss.row},${miss.col}`);
-            huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(dir => dir !== eliminatedDir);
-    
-            // Opcional: Si ahora solo queda una dirección, podríamos intentar añadir
-            // la siguiente celda en esa dirección desde el firstHit o lastHit a la cola.
-            // if (huntingInfo.possibleDirections.length === 1) { ... }
-        }
-    }
+   
     document
         .getElementById("btnOpenRanking")
         .addEventListener("click", function(e) {
         
             window.RankingModal.open();
         });
+}
+
+ // Configurar el botón de ranking
+
+ function opponentTurn() {
+    if (gamePhase !== 'opponent-turn') return;
+
+    addGameMessage("Turno del oponente...", true);
+
+    let targetRow, targetCol;
+    let validMoveFound = false;
+    let attempts = 0; // Contador para evitar bucles infinitos
+    const maxAttempts = boardSize * boardSize * 2; // Un límite generoso
+
+    // --- Estrategia de Selección de Objetivo ---
+    while (!validMoveFound && attempts < maxAttempts) {
+        attempts++;
+        let potentialTarget = chooseNextTarget(); // Intenta obtener un objetivo de la cola/caza
+
+        if (potentialTarget) {
+            targetRow = potentialTarget.row;
+            targetCol = potentialTarget.col;
+        } else {
+            // Si no hay objetivo prioritario (modo random o cola vacía), elige al azar
+            opponentMode = 'random'; // Asegura estar en modo aleatorio
+            huntingInfo = null;
+            targetQueue = []; // Limpia la cola por si acaso
+            targetRow = Math.floor(Math.random() * boardSize);
+            targetCol = Math.floor(Math.random() * boardSize);
+        }
+
+        // Verifica si la celda elegida es válida y no ha sido atacada
+        if (isValidAndUntouched(targetRow, targetCol)) {
+            validMoveFound = true;
+        } else if (potentialTarget) {
+             // Si el objetivo de la cola era inválido, simplemente lo ignoramos
+             // chooseNextTarget() ya lo habrá eliminado de la cola al hacer shift()
+             console.log(`AI: Target ${targetRow},${targetCol} from queue was invalid. Trying next.`);
+        }
+         // Si el intento aleatorio falla, el bucle while continuará
+    }
+    // --- Fin Selección de Objetivo ---
+
+    if (!validMoveFound) {
+        console.error("AI Error: No valid move found after max attempts. Skipping turn.");
+        addGameMessage("Error de la IA. Omitiendo turno.", true);
+         // Volver al turno del jugador para evitar bloqueo
+         gamePhase = 'player-turn';
+         addGameMessage("Es tu turno. ¡Elige una coordenada para atacar!");
+         checkGameEnd();
+        return; // Salir si no se encontró movimiento válido
+    }
+
+    // Pequeño retraso para simular pensamiento y ejecución
+    setTimeout(() => {
+        const cell = playerBoard.querySelector(`.board-cell[data-row="${targetRow}"][data-col="${targetCol}"]`);
+        if (!cell) {
+            console.error(`AI Error: Cell not found at ${targetRow},${targetCol}`);
+            // Recuperarse volviendo al turno del jugador
+            gamePhase = 'player-turn';
+            addGameMessage("Error interno. Es tu turno.");
+            checkGameEnd();
+            return;
+        }
+
+        let shotResult = 'miss'; // Resultado por defecto
+        let shipId = null; // ID del barco impactado
+
+        // Evalúa el disparo
+        if (cell.classList.contains('occupied')) { // ¡Impacto!
+            cell.innerHTML = '💥';
+            cell.classList.remove('occupied'); // Quita 'occupied' para evitar re-evaluaciones
+            cell.classList.add('hit');
+            gameStats.opponent.hits++;
+            shipId = cell.dataset.ship; // Asegúrate que 'data-ship' se asigna al crear el tablero del jugador
+            shotResult = 'hit';
+
+            // Verifica si el barco se hundió
+            if (isShipSunk(shipId, 'player')) { // Pasamos 'player' para chequear el tablero correcto
+                markSunkShip(shipId, 'player'); // Pasamos 'player'
+                addGameMessage(`¡El oponente ha hundido tu ${getShipName(shipId)}!`);
+                gameStats.opponent.shipsSunk++;
+                shotResult = 'sunk';
+            } else {
+                addGameMessage("¡Impacto! El oponente golpeó uno de tus barcos.");
+            }
+
+        } else if (isNearShip(targetRow, targetCol, 'player')) { // ¡Cerca! (Pasamos 'player')
+            cell.innerHTML = '⚠️';
+            cell.classList.add('near-hit');
+            addGameMessage("El oponente estuvo cerca de uno de tus barcos.");
+            gameStats.opponent.nearHits++;
+            shotResult = 'near-hit';
+        } else { // ¡Agua!
+            cell.innerHTML = '💧';
+            cell.classList.add('miss');
+            addGameMessage("El oponente ha disparado al agua.");
+            gameStats.opponent.misses++;
+            shotResult = 'miss';
+        }
+
+        // Actualiza el estado de la IA basado en el resultado
+        updateAIState(targetRow, targetCol, shotResult, shipId);
+
+        // Devuelve el turno al jugador y verifica fin de juego
+        gamePhase = 'player-turn';
+        // Solo mostrar mensaje de turno si el juego no ha terminado
+        if (gamePhase !== 'game-over') {
+             addGameMessage("Es tu turno. ¡Elige una coordenada para atacar!");
+        }
+        checkGameEnd(); // Comprobar si el juego termina después del movimiento del oponente
+
+    }, 1000 + Math.random() * 1000); // Delay entre 1 y 2 segundos
+}
+
+function isValidAndUntouched(row, col) {
+    // Verifica límites del tablero
+    if (row < 0 || row >= boardSize || col < 0 || col >= boardSize) {
+        return false;
+    }
+    // Verifica si la celda existe y no ha sido atacada en el tablero del JUGADOR
+    const cell = playerBoard.querySelector(`.board-cell[data-row="${row}"][data-col="${col}"]`);
+    if (!cell || cell.classList.contains('miss') || cell.classList.contains('hit') || cell.classList.contains('sunk') || cell.classList.contains('near-hit')) {
+        return false; // Ya atacada (miss, hit, sunk, near-hit) o no encontrada
+    }
+    return true; // Válida y no atacada
+}
+
+function getAdjacentCells(target, includeDiagonals = false) {
+    const { row, col } = target;
+    const neighbors = [];
+    // Direcciones: Arriba, Abajo, Izquierda, Derecha (y diagonales si includeDiagonals es true)
+    const directions = includeDiagonals
+        ? [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]] // 8 Dirs
+        : [[-1, 0], [1, 0], [0, -1], [0, 1]]; // 4 Dirs (N, S, W, E)
+
+    directions.forEach(([dr, dc]) => {
+        const nr = row + dr;
+        const nc = col + dc;
+        // No necesitamos verificar validez aquí, solo generar coordenadas
+        neighbors.push({ row: nr, col: nc });
+    });
+    return neighbors;
+}
+
+function addValidNeighborsToQueue(target, queue, includeDiagonals = false, specificDirections = null) {
+    let potentialNeighbors = getAdjacentCells(target, includeDiagonals);
+
+    // Filtrar por direcciones específicas si estamos cazando
+    if (specificDirections && huntingInfo) {
+        const lastKnownHit = huntingInfo.lastHit || huntingInfo.firstHit;
+         potentialNeighbors = potentialNeighbors.filter(n => {
+            const dr = n.row - lastKnownHit.row;
+            const dc = n.col - lastKnownHit.col;
+             if (dr === -1 && dc === 0 && specificDirections.includes('up')) return true;
+             if (dr === 1 && dc === 0 && specificDirections.includes('down')) return true;
+             if (dr === 0 && dc === -1 && specificDirections.includes('left')) return true;
+             if (dr === 0 && dc === 1 && specificDirections.includes('right')) return true;
+             // No añadir diagonales cuando se caza en una dirección específica por defecto
+             return false;
+        });
+    }
+
+    const currentQueueSet = new Set(queue.map(JSON.stringify)); // Para evitar duplicados rápidos
+    const newTargets = [];
+
+    potentialNeighbors.forEach(neighbor => {
+        if (isValidAndUntouched(neighbor.row, neighbor.col)) {
+             const neighborStr = JSON.stringify(neighbor);
+             if (!currentQueueSet.has(neighborStr)) { // Evita añadir si ya está en la cola
+                newTargets.push(neighbor);
+                currentQueueSet.add(neighborStr); // Añade al set para futuras comprobaciones en este bucle
+            }
+        }
+    });
+
+    // Añadir los nuevos objetivos al PRINCIPIO de la cola para priorizarlos
+    return [...newTargets, ...queue];
+    // Alternativa: Añadir al final: return [...queue, ...newTargets];
+}
+
+
+function chooseNextTarget() {
+    // Siempre prioriza la cola si no está vacía
+    while (targetQueue.length > 0) {
+        const nextTarget = targetQueue.shift(); // Obtiene y elimina el primer elemento
+        if (isValidAndUntouched(nextTarget.row, nextTarget.col)) {
+             console.log(`AI: Choosing target from queue: ${nextTarget.row},${nextTarget.col}. Mode: ${opponentMode}`);
+            return nextTarget; // Devuelve el primer objetivo válido encontrado
+        }
+         console.log(`AI: Target ${nextTarget.row},${nextTarget.col} from queue was invalid (already hit/missed). Discarding.`);
+         // Si no era válido, el bucle while cogerá el siguiente de la cola
+    }
+
+    // Si la cola está vacía, cambia a modo aleatorio y devuelve null
+     if (opponentMode !== 'random') {
+        console.log("AI: Target queue empty or exhausted. Switching to random mode.");
+        opponentMode = 'random';
+        huntingInfo = null; // Limpia información de caza
+    }
+    return null; // Indica que se debe elegir un objetivo aleatorio
+}
+
+
+function updateAIState(row, col, result, hitShipId) {
+    const currentTarget = { row, col };
+
+    if (result === 'sunk') {
+        addGameMessage(`AI: Barco ${getShipName(hitShipId)} hundido. Limpiando objetivos relacionados.`);
+        huntingInfo = null; // Se acabó la caza de este barco
+        // Limpiar la cola de objetivos adyacentes al barco recién hundido
+        targetQueue = filterQueueAfterSinking(hitShipId, targetQueue);
+        console.log(`AI: Queue after sinking ship ${hitShipId}:`, targetQueue.length);
+
+        // Si la cola queda vacía, modo aleatorio. Si no, sigue con lo que haya.
+        if (targetQueue.length === 0) {
+            opponentMode = 'random';
+            console.log("AI: Queue empty after sinking. Switching to random.");
+        } else {
+            // Si quedan objetivos, probablemente sean de 'near-hit' o de otra caza incompleta
+            // Mantenemos el modo que sea ('hunting' o 'near_hit_search') hasta que la cola se vacíe
+             console.log(`AI: Targets remain in queue (${targetQueue.length}). Continuing in mode ${opponentMode}.`);
+        }
+
+    } else if (result === 'hit') {
+        if (opponentMode !== 'hunting') {
+             // Primer impacto en este barco o transición desde 'near_hit_search'
+            console.log("AI: First hit! Switching to hunting mode.");
+            opponentMode = 'hunting';
+            huntingInfo = {
+                firstHit: currentTarget,
+                lastHit: currentTarget,
+                possibleDirections: ['up', 'down', 'left', 'right'] // Inicialmente todo es posible
+            };
+             // Añadir vecinos (solo ortogonales) a la cola
+            targetQueue = addValidNeighborsToQueue(currentTarget, targetQueue, false); // false = no diagonales
+        } else {
+            // Impacto consecutivo mientras se cazaba
+             console.log("AI: Consecutive hit while hunting.");
+             refineHuntingDirection(currentTarget); // Intenta deducir la dirección
+             huntingInfo.lastHit = currentTarget; // Actualiza el último impacto
+             // Añadir vecinos en las direcciones posibles (si se han reducido)
+             targetQueue = addValidNeighborsToQueue(currentTarget, targetQueue, false, huntingInfo.possibleDirections);
+        }
+        // Asegurarse de que la celda recién golpeada no esté en la cola
+        targetQueue = targetQueue.filter(t => !(t.row === row && t.col === col));
+        console.log(`AI: Queue after hit at ${row},${col}:`, targetQueue.length, "Directions:", huntingInfo?.possibleDirections);
+
+
+    } else if (result === 'near-hit') {
+         console.log("AI: Near-hit detected.");
+         // Añadir TODOS los vecinos (incluyendo diagonales) a la cola si no estamos ya cazando
+         if (opponentMode !== 'hunting') {
+             targetQueue = addValidNeighborsToQueue(currentTarget, targetQueue, true); // true = incluye diagonales
+             if (opponentMode === 'random') {
+                 opponentMode = 'near_hit_search'; // Cambia a buscar cerca si estaba en aleatorio
+                  console.log("AI: Switching to near-hit search mode.");
+             }
+         } else {
+             console.log("AI: Ignored near-hit queue add because already hunting.");
+              // Opcional: Podrías añadir vecinos de near-hit con menor prioridad si estás cazando
+         }
+         // Asegurarse de que la celda 'near-hit' no esté en la cola
+         targetQueue = targetQueue.filter(t => !(t.row === row && t.col === col));
+         console.log(`AI: Queue after near-hit at ${row},${col}:`, targetQueue.length);
+
+
+    } else if (result === 'miss') {
+         console.log("AI: Missed.");
+         if (opponentMode === 'hunting') {
+            // Un fallo mientras se caza ayuda a eliminar direcciones
+            eliminateHuntingDirection(currentTarget);
+            console.log(`AI: Miss while hunting. Possible directions left: ${huntingInfo?.possibleDirections?.join(', ')}`);
+             // Si después de eliminar dirección, la cola de caza se vacía Y no quedan direcciones
+             if (huntingInfo && huntingInfo.possibleDirections.length === 0 && targetQueue.length === 0) {
+                 console.log("AI: Hunting failed (no more directions/targets). Switching to random.");
+                 opponentMode = 'random';
+                 huntingInfo = null;
+             }
+        }
+        // Asegurarse de que la celda fallida no esté en la cola
+        targetQueue = targetQueue.filter(t => !(t.row === row && t.col === col));
+         // Si la cola general se vacía, volver a aleatorio
+         if (targetQueue.length === 0 && opponentMode !== 'random') {
+             console.log("AI: Queue empty after miss. Switching to random mode.");
+             opponentMode = 'random';
+             huntingInfo = null;
+         }
+    }
+
+    // Opcional: Limitar tamaño de la cola para evitar que crezca demasiado
+     if (targetQueue.length > boardSize * 2) {
+         targetQueue = targetQueue.slice(0, boardSize * 2); // Mantén solo los primeros N objetivos
+     }
+    // console.log("AI Final State:", { opponentMode, huntingInfo, queueLength: targetQueue.length });
+    // console.log("Queue:", targetQueue.map(t=>`[${t.row},${t.col}]`).join(' '));
+}
+
+
+function filterQueueAfterSinking(sunkShipId, queue) {
+    const sunkCellsCoords = [];
+    // Encuentra todas las celdas del barco hundido en el tablero del JUGADOR
+    for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
+            const cell = playerBoard.querySelector(`.board-cell[data-row="${r}"][data-col="${c}"]`);
+            // Comprueba si tiene la clase 'sunk' Y si su data-ship coincide
+            if (cell && cell.classList.contains('sunk') && cell.dataset.ship === sunkShipId) {
+                 sunkCellsCoords.push({ row: r, col: c });
+            }
+             // Alternativa si playerBoardState está disponible y es fiable:
+             // if (playerBoardState[r][c] === parseInt(sunkShipId)) { // Cuidado con tipos string/number
+             //    sunkCellsCoords.push({ row: r, col: c });
+             // }
+        }
+    }
+
+    // Crea un Set con las coordenadas adyacentes (incl. diagonales) a CUALQUIER parte del barco hundido
+    const cellsNearSunkShip = new Set();
+    sunkCellsCoords.forEach(sunkCell => {
+        // Añadir la propia celda hundida (por si estaba en la cola)
+        cellsNearSunkShip.add(JSON.stringify(sunkCell));
+        // Añadir todas las vecinas
+        const neighbors = getAdjacentCells(sunkCell, true); // true = incluye diagonales
+        neighbors.forEach(n => cellsNearSunkShip.add(JSON.stringify(n)));
+    });
+
+    // Filtra la cola original, manteniendo solo los objetivos que NO están en el Set
+    return queue.filter(target => !cellsNearSunkShip.has(JSON.stringify(target)));
+}
+
+
+function refineHuntingDirection(hitTarget) {
+    // Esta función intenta deducir si el barco es horizontal o vertical
+    if (!huntingInfo || !huntingInfo.firstHit || huntingInfo.firstHit.row === hitTarget.row && huntingInfo.firstHit.col === hitTarget.col) {
+        // No hay suficiente información (es el primer o segundo hit)
+        return;
+    }
+
+    const first = huntingInfo.firstHit;
+    const current = hitTarget;
+
+    if (first.row === current.row) { // Posiblemente horizontal
+        console.log("AI Refine: Detected horizontal possibility.");
+        huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(dir => dir === 'left' || dir === 'right');
+    } else if (first.col === current.col) { // Posiblemente vertical
+        console.log("AI Refine: Detected vertical possibility.");
+        huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(dir => dir === 'up' || dir === 'down');
+    }
+    // Si no es ni horizontal ni vertical respecto al primer hit (¿imposible con 2+ hits?), no hacemos nada.
+
+    // Eliminar direcciones bloqueadas por bordes basado en el ÚLTIMO hit
+     if (current.col === 0) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'left');
+     if (current.col === boardSize - 1) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'right');
+     if (current.row === 0) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'up');
+     if (current.row === boardSize - 1) huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(d => d !== 'down');
+}
+
+
+function eliminateHuntingDirection(missTarget) {
+    // Elimina una dirección basada en dónde ocurrió el fallo relativo al último impacto
+    if (!huntingInfo || !huntingInfo.lastHit) return;
+
+    const lastHit = huntingInfo.lastHit;
+    const miss = missTarget;
+    let eliminatedDir = null;
+
+    if (miss.row < lastHit.row && miss.col === lastHit.col) eliminatedDir = 'up';
+    else if (miss.row > lastHit.row && miss.col === lastHit.col) eliminatedDir = 'down';
+    else if (miss.col < lastHit.col && miss.row === lastHit.row) eliminatedDir = 'left';
+    else if (miss.col > lastHit.col && miss.row === lastHit.row) eliminatedDir = 'right';
+
+    if (eliminatedDir && huntingInfo.possibleDirections.includes(eliminatedDir)) {
+         console.log(`AI Eliminate: Eliminating direction ${eliminatedDir} due to miss at ${miss.row},${miss.col}`);
+        huntingInfo.possibleDirections = huntingInfo.possibleDirections.filter(dir => dir !== eliminatedDir);
+
+        // Opcional: Si ahora solo queda una dirección, podríamos intentar añadir
+        // la siguiente celda en esa dirección desde el firstHit o lastHit a la cola.
+        // if (huntingInfo.possibleDirections.length === 1) { ... }
+    }
 }
 
     // Iniciar el juego
