@@ -474,6 +474,10 @@ function isShipSunk(shipId, player = 'opponent') {
         
         document.getElementById('showStatsBtn').addEventListener('click', sendGameStatsToBackend);
         document.getElementById('showStatsBtn').addEventListener('click', showStats);
+        document.getElementById('showStatsBtn').addEventListener('click', () => {
+            showStatsModal();
+        });
+        
         document.getElementById('playAgainBtn').addEventListener('click', () => {
             window.location.href = 'personalizar.html';
         });
@@ -482,6 +486,37 @@ function isShipSunk(shipId, player = 'opponent') {
     function showStats(params) {
         
     }
+    // Función para mostrar el modal de estadísticas
+function showStatsModal() {
+    // Calcular precisión
+    const totalShots = gameStats.player.hits + gameStats.player.misses;
+    const accuracy = totalShots > 0 
+        ? Math.round((gameStats.player.hits / totalShots) * 100) 
+        : 0;
+    
+    // Calcular tiempo de juego
+    const gameDuration = Math.floor((Date.now() - gameStartTime) / 1000);
+    const minutes = Math.floor(gameDuration / 60);
+    const seconds = gameDuration % 60;
+    
+    // Actualizar elementos del modal
+    document.getElementById('statsPlayerHits').textContent = gameStats.player.hits;
+    document.getElementById('statsPlayerMisses').textContent = gameStats.player.misses;
+    document.getElementById('statsPlayerNearHits').textContent = gameStats.player.nearHits;
+    document.getElementById('statsPlayerSunk').textContent = gameStats.player.shipsSunk;
+    
+    document.getElementById('statsOpponentHits').textContent = gameStats.opponent.hits;
+    document.getElementById('statsOpponentMisses').textContent = gameStats.opponent.misses;
+    document.getElementById('statsOpponentNearHits').textContent = gameStats.opponent.nearHits;
+    document.getElementById('statsOpponentSunk').textContent = gameStats.opponent.shipsSunk;
+    
+    document.getElementById('statsAccuracy').textContent = `Precisión: ${accuracy}%`;
+    document.getElementById('statsTime').textContent = `Duración: ${minutes}m ${seconds}s`;
+    
+    // Mostrar el modal usando Bootstrap
+    const statsModal = new bootstrap.Modal(document.getElementById('statsModal'));
+    statsModal.show();
+}
 
 
 
@@ -537,6 +572,8 @@ function isShipSunk(shipId, player = 'opponent') {
 
     // Configurar event listeners
     function setupEventListeners() {
+        // En la función setupEventListeners:
+        document.getElementById('showStatsBtn')?.addEventListener('click', showStatsModal);
         if (restartBtn) {
             restartBtn.addEventListener('click', () => {
                 if (confirm("¿Estás seguro de que quieres reiniciar el juego?")) {
