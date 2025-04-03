@@ -336,7 +336,7 @@ function updateStatsDisplay() {
             
             // Verificar si el juego ha terminado
             checkGameEnd();
-        }, 1500);
+        }, 15);
     }
 
     // Verificar si un barco ha sido hundido
@@ -415,16 +415,22 @@ function isShipSunk(shipId, player = 'opponent') {
         });
     }
 
-    // Verificar si el juego ha terminado
     function checkGameEnd() {
+        // Verificar si el juego ya terminó para no ejecutarlo múltiples veces
+        if (gamePhase === 'game-over') return;
+        
         const playerShipsSunk = areAllShipsSunk('player');
         const opponentShipsSunk = areAllShipsSunk('opponent');
-
+    
         if (playerShipsSunk || opponentShipsSunk) {
             gamePhase = 'game-over';
             const winner = opponentShipsSunk ? 'player' : 'opponent';
-            showVictoryScreen(winner);
-            sendGameStatsToBackend(winner);
+            
+            
+            // Mostrar la pantalla de victoria con un pequeño retraso para asegurar que otros eventos se han completado
+            setTimeout(() => {
+                showVictoryScreen(winner)
+            }, 100);
         }
     }
 
@@ -446,77 +452,208 @@ function isShipSunk(shipId, player = 'opponent') {
         return true;
     }
 
-    // Mostrar pantalla de victoria
-    function showVictoryScreen(winner) {
-        const victoryOverlay = document.createElement('div');
-        victoryOverlay.id = 'victoryOverlay';
-        victoryOverlay.style.position = 'fixed';
-        victoryOverlay.style.top = '0';
-        victoryOverlay.style.left = '0';
-        victoryOverlay.style.width = '100%';
-        victoryOverlay.style.height = '100%';
-        victoryOverlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
-        victoryOverlay.style.display = 'flex';
-        victoryOverlay.style.flexDirection = 'column';
-        victoryOverlay.style.justifyContent = 'center';
-        victoryOverlay.style.alignItems = 'center';
-        victoryOverlay.style.zIndex = '1000';
-        victoryOverlay.style.color = 'white';
-        
-        victoryOverlay.innerHTML = `
-            <h1>¡${winner === 'player' ? 'GANASTE' : 'PERDISTE'}!</h1>
-            <p>${winner === 'player' ? 'Has hundido toda la flota enemiga' : 'Tu flota ha sido destruida'}</p>
-            <button id="showStatsBtn" class="btn btn-primary mt-3">Ver Estadísticas</button>
-            <button id="playAgainBtn" class="btn btn-success mt-2">Jugar de Nuevo</button>
-        `;
-        
-        document.body.appendChild(victoryOverlay);
-        
-        document.getElementById('showStatsBtn').addEventListener('click', sendGameStatsToBackend);
-        document.getElementById('showStatsBtn').addEventListener('click', showStats);
-        document.getElementById('showStatsBtn').addEventListener('click', () => {
-            showStatsModal();
-        });
-        
-        document.getElementById('playAgainBtn').addEventListener('click', () => {
-            window.location.href = 'personalizar.html';
-        });
-    }
+ 
 
-    function showStats(params) {
+        function showVictoryScreen(winner) {
+            const victoryOverlay = document.createElement('div');
+            victoryOverlay.id = 'victoryOverlay';
+            victoryOverlay.id = 'victoryOverlay';
+            victoryOverlay.style.position = 'fixed';
+            victoryOverlay.style.top = '0';
+            victoryOverlay.style.left = '0';
+            victoryOverlay.style.width = '100%';
+            victoryOverlay.style.height = '100%';
+            victoryOverlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            victoryOverlay.style.display = 'flex';
+            victoryOverlay.style.flexDirection = 'column';
+            victoryOverlay.style.justifyContent = 'center';
+            victoryOverlay.style.alignItems = 'center';
+            victoryOverlay.style.zIndex = '1000';
+            victoryOverlay.style.color = 'white';
+            
+            victoryOverlay.innerHTML = `
+                <h1>¡${winner === 'player' ? 'GANASTE' : 'PERDISTE'}!</h1>
+                <p>${winner === 'player' ? 'Has hundido toda la flota enemiga' : 'Tu flota ha sido destruida'}</p>
+                <div class="d-flex flex-column" style="width: 200px;">
+                    <button id="showStatsBtn" class="btn btn-primary mb-2">Ver Estadísticas</button>
+                    <button id="playAgainBtn" class="btn btn-success">Jugar de Nuevo</button>
+                </div>
+            `;
+            
+            document.body.appendChild(victoryOverlay);
+            
+            // Usar event delegation para manejar los clics
+            victoryOverlay.addEventListener('click', function(e) {
+                if (e.target.id === 'showStatsBtn') {
+                    showStatsModal()
+                } else if (e.target.id === 'playAgainBtn') {
+                    e.preventDefault();
+                    sendGameStatsToBackend(winner)
+                        .then(() => {
+                            localStorage.removeItem('currentGameData');
+                            window.location.href = 'personalizar.html';
+                        })
+                        .catch(error => console.error(error));
+                }
+            });
+            
         
-    }
-    // Función para mostrar el modal de estadísticas
+        }
+
+
+// Función para mostrar el modal de estadísticas con todos los detalles del juego
 function showStatsModal() {
-    // Calcular precisión
-    const totalShots = gameStats.player.hits + gameStats.player.misses;
-    const accuracy = totalShots > 0 
-        ? Math.round((gameStats.player.hits / totalShots) * 100) 
+    // 1. Calcular precisión del jugador
+    const totalPlayerShots = gameStats.player.hits + gameStats.player.misses;
+    const playerAccuracy = totalPlayerShots > 0 
+        ? Math.round((gameStats.player.hits / totalPlayerShots) * 100) 
         : 0;
     
-    // Calcular tiempo de juego
+    // 2. Calcular precisión del oponente (IA)
+    const totalOpponentShots = gameStats.opponent.hits + gameStats.opponent.misses;
+    const opponentAccuracy = totalOpponentShots > 0 
+        ? Math.round((gameStats.opponent.hits / totalOpponentShots) * 100) 
+        : 0;
+    
+    // 3. Calcular tiempo de juego en minutos y segundos
     const gameDuration = Math.floor((Date.now() - gameStartTime) / 1000);
     const minutes = Math.floor(gameDuration / 60);
     const seconds = gameDuration % 60;
     
-    // Actualizar elementos del modal
-    document.getElementById('statsPlayerHits').textContent = gameStats.player.hits;
-    document.getElementById('statsPlayerMisses').textContent = gameStats.player.misses;
-    document.getElementById('statsPlayerNearHits').textContent = gameStats.player.nearHits;
-    document.getElementById('statsPlayerSunk').textContent = gameStats.player.shipsSunk;
+    // 4. Calcular puntaje basado en el rendimiento
+    const score = calculatePlayerScore();
     
-    document.getElementById('statsOpponentHits').textContent = gameStats.opponent.hits;
-    document.getElementById('statsOpponentMisses').textContent = gameStats.opponent.misses;
-    document.getElementById('statsOpponentNearHits').textContent = gameStats.opponent.nearHits;
-    document.getElementById('statsOpponentSunk').textContent = gameStats.opponent.shipsSunk;
+    // 5. Actualizar todos los elementos del modal con las estadísticas
+    updateModalStats({
+        playerHits: gameStats.player.hits,
+        playerMisses: gameStats.player.misses,
+        playerNearHits: gameStats.player.nearHits,
+        playerSunk: gameStats.player.shipsSunk,
+        playerAccuracy: playerAccuracy,
+        
+        opponentHits: gameStats.opponent.hits,
+        opponentMisses: gameStats.opponent.misses,
+        opponentNearHits: gameStats.opponent.nearHits,
+        opponentSunk: gameStats.opponent.shipsSunk,
+        opponentAccuracy: opponentAccuracy,
+        
+        gameTime: `${minutes}m ${seconds}s`,
+        playerScore: score,
+        
+        // Datos adicionales del jugador
+        playerName: player.nick_name || 'Anónimo',
+        playerCountry: player.country_code || 'XX',
+        gameLocation: gameLocation?.name || 'Ubicación desconocida',
+        weatherCondition: weatherData?.weather[0]?.description || 'Condición desconocida'
+    });
     
-    document.getElementById('statsAccuracy').textContent = `Precisión: ${accuracy}%`;
-    document.getElementById('statsTime').textContent = `Duración: ${minutes}m ${seconds}s`;
-    
-    // Mostrar el modal usando Bootstrap
-    const statsModal = new bootstrap.Modal(document.getElementById('statsModal'));
-    statsModal.show();
+    // 6. Mostrar el modal usando Bootstrap
+    showBootstrapModal();
 }
+
+// Función auxiliar para calcular el puntaje del jugador
+function calculatePlayerScore() {
+    const baseScore = gameStats.player.hits * 10;
+    const nearHitPenalty = gameStats.player.nearHits * 3;
+    const missPenalty = gameStats.player.misses * 1;
+    const sunkBonus = gameStats.player.shipsSunk * 15;
+    
+    return baseScore - nearHitPenalty - missPenalty + sunkBonus;
+}
+
+// Función auxiliar para actualizar los elementos del modal
+function updateModalStats({
+    playerHits, playerMisses, playerNearHits, playerSunk, playerAccuracy,
+    opponentHits, opponentMisses, opponentNearHits, opponentSunk, opponentAccuracy,
+    gameTime, playerScore, playerName, playerCountry, gameLocation, weatherCondition
+}) {
+    // Actualizar estadísticas del jugador
+    document.getElementById('statsPlayerHits').textContent = playerHits;
+    document.getElementById('statsPlayerMisses').textContent = playerMisses;
+    document.getElementById('statsPlayerNearHits').textContent = playerNearHits;
+    document.getElementById('statsPlayerSunk').textContent = playerSunk;
+    document.getElementById('statsPlayerAccuracy').textContent = `${playerAccuracy}%`;
+    
+    // Actualizar estadísticas del oponente
+    document.getElementById('statsOpponentHits').textContent = opponentHits;
+    document.getElementById('statsOpponentMisses').textContent = opponentMisses;
+    document.getElementById('statsOpponentNearHits').textContent = opponentNearHits;
+    document.getElementById('statsOpponentSunk').textContent = opponentSunk;
+    document.getElementById('statsOpponentAccuracy').textContent = `${opponentAccuracy}%`;
+    
+    // Actualizar resumen del juego
+    document.getElementById('statsTime').textContent = gameTime;
+    document.getElementById('statsPlayerScore').textContent = playerScore;
+    
+    // Actualizar información adicional
+    document.getElementById('statsPlayerName').textContent = playerName;
+    document.getElementById('statsPlayerCountry').textContent = playerCountry;
+    document.getElementById('statsGameLocation').textContent = gameLocation;
+    document.getElementById('statsWeatherCondition').textContent = weatherCondition;
+    
+    // Actualizar gráficos o elementos visuales si existen
+    updateVisualStats(playerAccuracy, opponentAccuracy);
+}
+
+// Mejora en la función showBootstrapModal()
+function showBootstrapModal() {
+    // Verificar si el modal existe
+    const modalElement = document.getElementById('statsModal');
+    if (!modalElement) {
+        console.error('El modal de estadísticas no se encontró en el DOM');
+        return;
+    }
+    
+    // Asegurarse de que Bootstrap está completamente cargado
+    if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+        console.error('Bootstrap no está cargado correctamente');
+        // Intentar recargar el script de Bootstrap
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+        document.body.appendChild(script);
+        
+        // Esperar a que se cargue y reintentar
+        script.onload = function() {
+            setTimeout(showBootstrapModal, 100);
+        };
+        return;
+    }
+    
+    try {
+        // Configurar opciones del modal
+        const modalOptions = {
+            backdrop: 'static', // No se cierra al hacer clic fuera
+            keyboard: false,    // No se cierra con la tecla ESC
+            focus: true         // Enfocar el modal al mostrarlo
+        };
+        
+        // Crear instancia del modal y mostrarlo
+        const statsModal = new bootstrap.Modal(modalElement, modalOptions);
+        statsModal.show();
+        
+
+    } catch (error) {
+        console.error('Error al mostrar el modal:', error);
+    }
+}
+
+// Función auxiliar para actualizar elementos visuales (opcional)
+function updateVisualStats(playerAccuracy, opponentAccuracy) {
+    // Actualizar barras de progreso si existen
+    const playerAccuracyBar = document.getElementById('playerAccuracyBar');
+    const opponentAccuracyBar = document.getElementById('opponentAccuracyBar');
+    
+    if (playerAccuracyBar) {
+        playerAccuracyBar.style.width = `${playerAccuracy}%`;
+        playerAccuracyBar.setAttribute('aria-valuenow', playerAccuracy);
+    }
+    
+    if (opponentAccuracyBar) {
+        opponentAccuracyBar.style.width = `${opponentAccuracy}%`;
+        opponentAccuracyBar.setAttribute('aria-valuenow', opponentAccuracy);
+    }
+}
+
 
 
 
@@ -535,7 +672,8 @@ function showStatsModal() {
             country_code: countryCode,
         };
     
-        fetch(`${BACKEND_URL}/score-recorder`, {
+        // Añadir return para encadenar promesas correctamente
+        return fetch(`${BACKEND_URL}/score-recorder`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -550,11 +688,11 @@ function showStatsModal() {
         })
         .then(data => {
             console.log('Puntaje enviado:', data);
-            // Mostrar confirmación al usuario
+            return data; // Retornar los datos para manejo posterior
         })
         .catch(error => {
             console.error('Error al enviar puntaje:', error);
-            // Mostrar error al usuario (puedes usar un toast o alerta)
+            throw error; // Relanzar el error para manejo superior
         });
     }
 
@@ -571,33 +709,50 @@ function showStatsModal() {
     }
 
     // Configurar event listeners
-    function setupEventListeners() {
-        // En la función setupEventListeners:
-        document.getElementById('showStatsBtn')?.addEventListener('click', showStatsModal);
-        if (restartBtn) {
-            restartBtn.addEventListener('click', () => {
-                if (confirm("¿Estás seguro de que quieres reiniciar el juego?")) {
-                    window.location.href = 'personalizar.html';
-                }
-            });
-        }
-        
-        if (surrenderBtn) {
-            surrenderBtn.addEventListener('click', () => {
-                if (confirm("¿Estás seguro de que quieres rendirte?")) {
-                    addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
-                    gamePhase = 'game-over';
-                    sendGameStatsToBackend('opponent');
-                }
-            });
-        }
+// Mejora en la configuración de eventos iniciales
+function setupEventListeners() {
+    // Configurar el botón de estadísticas en el navbar
+    const navStatsBtn = document.getElementById('showStatsBtn');
+    if (navStatsBtn) {
+        navStatsBtn.addEventListener('click', function(e) {
+            showStatsModal();
+        });
     }
-
+    
+    // Configurar botones de reinicio y rendición con prevención de eventos
+    if (restartBtn) {
+        restartBtn.addEventListener('click', function(e) {
+            
+            if (confirm("¿Estás seguro de que quieres reiniciar el juego?")) {
+                localStorage.removeItem('currentGameData');
+                window.location.href = 'personalizar.html';
+            }
+        });
+    }
+    
+    if (surrenderBtn) {
+        surrenderBtn.addEventListener('click', function(e) {
+            
+            if (confirm("¿Estás seguro de que quieres rendirte?")) {
+                addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
+                gamePhase = 'game-over';
+                
+                sendGameStatsToBackend('opponent')
+                    .then(() => {
+                        showVictoryScreen('opponent');
+                    });
+            }
+        });
+    }
+    
+    // Configurar el botón de ranking
     document
-    .getElementById("btnOpenRanking")
-    .addEventListener("click", function () {
-      window.RankingModal.open();
-    });
+        .getElementById("btnOpenRanking")
+        .addEventListener("click", function(e) {
+        
+            window.RankingModal.open();
+        });
+}
 
     // Iniciar el juego
     initGame();
