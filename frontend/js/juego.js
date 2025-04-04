@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const conditionInfo = document.getElementById("conditionInfo");
   const playerBoard = document.getElementById("playerBoard");
   const opponentBoard = document.getElementById("opponentBoard");
+  const exportMaps = document.getElementById("exportMaps")
   const player = getPlayerData() || "Anónimo";
   const BACKEND_URL = "http://localhost:5000";
 
@@ -874,6 +875,10 @@ function attackPlayerCell(row, col) {
       });
     }
 
+    if (exportMaps){
+      exportMaps
+    }
+
     document
       .getElementById("btnOpenRanking")
       .addEventListener("click", function (e) {
@@ -888,11 +893,10 @@ function attackPlayerCell(row, col) {
   
  
     function createAsciiBoard(matrix, title) {
-      // Ajustamos el ancho de las celdas para 4 caracteres
+      // Ancho fijo de celda: 4 caracteres (exactos)
       const cellWidth = 4;
-      const padding = ' '.repeat((cellWidth - 2) / 2);
       
-      // Creamos las líneas horizontales con el nuevo ancho
+      // Líneas horizontales
       const horizontalLine = `┌${'────'.repeat(matrix[0].length)}┐\n`;
       const dividerLine = `├${'────'.repeat(matrix[0].length)}┤\n`;
       const bottomLine = `└${'────'.repeat(matrix[0].length)}┘`;
@@ -900,19 +904,15 @@ function attackPlayerCell(row, col) {
       let boardStr = `${title}\n${horizontalLine}`;
       
       matrix.forEach((row, rowIndex) => {
-          // Formateamos cada fila con el contenido centrado
           let rowStr = '│';
           row.forEach(cell => {
-              // Aseguramos que el contenido no exceda 4 caracteres
-              const content = String(cell).length <= 4 ? String(cell) : String(cell).substring(0, 4);
-              // Centramos el contenido en la celda
-              const paddedContent = content.padStart((cellWidth - content.length) / 2 + content.length)
-                                          .padEnd(cellWidth);
+              // Asegurar 4 caracteres exactos (relleno con espacios si es necesario)
+              const paddedContent = String(cell).padEnd(cellWidth).substring(0, cellWidth);
               rowStr += `${paddedContent}│`;
           });
           boardStr += `${rowStr}\n`;
           
-          // Añadimos divisores entre filas (excepto después de la última)
+          // Añadir divisor entre filas (excepto última)
           if (rowIndex !== matrix.length - 1) {
               boardStr += dividerLine;
           }
