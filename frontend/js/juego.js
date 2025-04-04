@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }</p>
                 <div class="d-flex flex-column" style="width: 200px;">
                     <button id="showStatsBtn" class="btn btn-primary mb-2">Ver Estadísticas</button>
-                    <button id="playAgainBtn" class="btn btn-success">Jugar de Nuevo</button>
+                    <button id="playAgainBtn" class="btn btn-success mb-2">Jugar de Nuevo</button>
                     <button id="exportMaps" class="btn btn-info">Exportar mapas</button>
                 </div>
             `;
@@ -1250,77 +1250,133 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-//   // Función para convertir un tablero a string
-// function boardToString(boardState, boardElement) {
-//     let result = "";
-//     for (let row = 0; row < boardSize; row++) {
-//         for (let col = 0; col < boardSize; col++) {
-//             const cell = boardElement.querySelector(`.board-cell[data-row="${row}"][data-col="${col}"]`);
-            
-//             if (cell.classList.contains('hit')) {
-//                 result += "X"; // Impacto en barco
-//             } else if (cell.classList.contains('miss')) {
-//                 result += "O"; // Disparo al agua
-//             } else if (cell.classList.contains('near-hit')) {
-//                 result += "~"; // Cerca de un barco
-//             } else if (cell.classList.contains('occupied')) {
-//                 result += "B"; // Barco no descubierto
-//             } else {
-//                 result += "."; // Celda vacía no disparada
-//             }
-            
-//             // Agregar separador de columnas (excepto en la última)
-//             if (col < boardSize - 1) result += ",";
-//         }
-//         // Agregar separador de filas (excepto en la última)
-//         if (row < boardSize - 1) result += ";";
-//     }
-//     return result;
-// }
 
-// Función para exportar ambos tableros
-function exportBoards() {
-    // Obtener representación string de ambos tableros
-    const playerBoardStr = JSON.stringify(playerBoardState);
-    const opponentBoardStr = JSON.stringify(opponentBoardState);
-    
-    // Crear un objeto con ambos tableros
-    const exportData = {
-        playerBoard: playerBoardStr,
-        opponentBoard: opponentBoardStr,
-        metadata: {
-            date: new Date().toISOString(),
-            player: player.nick_name || "Anónimo",
-            size: boardSize
-        }
+  function exportBoards() {
+    // Mapeo de tipos de barco
+    const shipTypeToChar = {
+        '1': 'S',  // Submarino (2)
+        '2': 'S',   // Submarino2 (2)
+        '3': 'C',  // Crucero (3)
+        '4': 'C',  // Crucero2 (3)
+        '5': 'A',  // Acorazado (4)
+        '6': 'P',  // Portaaviones (5)
     };
-    
-    // Convertir a JSON para exportación
-    const exportJson = JSON.stringify(exportData, null, 2);
-    
-    // // Opción 1: Mostrar en alerta (para prueba)
-    // alert("Datos de los tableros:\n" + exportJson);
-    
-    // // Opción 2: Copiar al portapapeles
-    // navigator.clipboard.writeText(exportJson).then(() => {
-    //     addGameMessage("¡Tableros copiados al portapapeles!");
-    // }).catch(err => {
-    //     console.error("Error al copiar al portapapeles:", err);
-    //     addGameMessage("Error al copiar los tableros", true);
-    // });
-    
-    // Opción 3: Descargar como archivo
-    const blob = new Blob([exportJson], { type: 'application/json' });
+
+    // Mapeo de estados
+    const stateToChar = {
+        'hit': 'X',
+        'sunk': '#',
+        'near-hit': '~',
+        'miss': 'O',
+        'default': '.'
+    };
+
+    // Función para crear tabla ASCII
+    function createAsciiBoard(matrix, title) {
+        const horizontalLine = `┌───${'┬───'.repeat(matrix[0].length - 1)}┐\n`;
+        let boardStr = `${title}\n${horizontalLine}`;
+        
+        matrix.forEach((row, rowIndex) => {
+            boardStr += `│ ${row.join(' │ ')} │\n`;
+            boardStr += rowIndex === matrix.length - 1 
+                ? `└───${'┴───'.repeat(row.length - 1)}┘`
+                : `├───${'┼───'.repeat(row.length - 1)}┤\n`;
+        });
+        
+        return boardStr;
+    }
+
+    // Convertir tablero HTML a matriz
+    function boardToMatrix(boardElement) {
+        const matrix = [];
+        for (let row = 0; row < boardSize; row++) {
+            const rowArray = [];
+            for (let col = 0; col < boardSize; col++) {
+                const cell = boardElement.querySelector(
+                    `.board-cell[data-row="${row}"][data-col="${col}"]`
+                );
+                
+                let char = '.';
+                
+                if (cell) {
+                    if (cell.classList.contains('sunk')) {
+                        char = '#';
+                    } else if (cell.classList.contains('hit')) {
+                        char = 'X';
+                    } else if (cell.classList.contains('near-hit')) {
+                        char = '~';
+                    } else if (cell.classList.contains('miss')) {
+                        char = 'O';
+                    } else if (cell.classList.contains('occupied')) {
+                        const shipType = cell.dataset.ship;
+                        char = shipTypeToChar[shipType] || 'B';
+                    }
+                }
+                
+                rowArray.push(char);
+            }
+            matrix.push(rowArray);
+        }
+        return matrix;
+    }
+
+    // Procesar ambos tableros
+    const playerMatrix = boardToMatrix(playerBoard);
+    const opponentMatrix = boardToMatrix(opponentBoard);
+
+    // Crear contenido del archivo
+    const textContent = `
+╔══════════════════════════════╗
+║        BATALLA NAVAL         ║
+╠══════════════════════════════╣
+║ Jugador: ${player.nick_name || "Anónimo"}
+║ Fecha: ${new Date().toLocaleString()}
+║ Ubicación: ${gameLocation?.name || "Desconocida"}
+║ Resultado: ${gamePhase === "game-over" 
+    ? (areAllShipsSunk("opponent") ? "VICTORIA" : "Derrota") 
+    : "En progreso"}
+╚══════════════════════════════╝
+
+${createAsciiBoard(playerMatrix, "TU FLOTA")}
+
+${createAsciiBoard(opponentMatrix, "FLOTA ENEMIGA")}
+
+╔══════════════════════════════╗
+║          LEYENDA             ║
+╠══════════════════════════════╣
+║ P → Portaaviones (5 casillas)║
+║ A → Acorazado (4 casillas)   ║
+║ C → Crucero (3 casillas)     ║
+║ S → Submarino (2 casillas)   ║
+║ X → Impacto                  ║
+║ # → Hundido                  ║
+║ ~ → Disparo cercano          ║
+║ O → Agua                     ║
+║ . → Casilla vacía            ║
+╚══════════════════════════════╝
+
+ESTADÍSTICAS:
+- Tus barcos hundidos: ${gameStats.opponent.shipsSunk}
+- Barcos enemigos hundidos: ${gameStats.player.shipsSunk}
+- Precisión: ${Math.round((gameStats.player.hits / (gameStats.player.hits + gameStats.player.misses || 1)) * 100)}%
+`;
+
+    // Crear y descargar archivo
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `batalla-naval-${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `batalla-naval-${player.nick_name || "anonimo"}-${new Date().toISOString().slice(0,10)}.txt`;
     
-    return exportData;
+    // Agregar temporalmente al documento y simular click
+    document.body.appendChild(link);
+    link.click();
+    
+    // Limpiar después de la descarga
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 100);
 }
 
   // Configurar el botón de ranking
