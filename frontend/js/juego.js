@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const conditionInfo = document.getElementById("conditionInfo");
   const playerBoard = document.getElementById("playerBoard");
   const opponentBoard = document.getElementById("opponentBoard");
+  const exportMaps = document.getElementById("exportMaps")
   const player = getPlayerData() || "Anónimo";
   const BACKEND_URL = "http://localhost:5000";
 
@@ -552,6 +553,7 @@ function attackPlayerCell(row, col) {
 
         // Mostrar pantalla de victoria
         setTimeout(() => showVictoryScreen(winner), 1500);
+        sendGameStatsToBackend(winner)
     }
 }
 
@@ -874,6 +876,12 @@ function attackPlayerCell(row, col) {
       });
     }
 
+    if (exportMaps){
+      exportMaps.addEventListener("click", function (e) {
+        exportBoards()
+      });
+    }
+
     document
       .getElementById("btnOpenRanking")
       .addEventListener("click", function (e) {
@@ -885,42 +893,40 @@ function attackPlayerCell(row, col) {
 
 
   function exportBoards() {
-    // Mapeo de tipos de barco
-    const shipTypeToChar = {
-        '1': 'S',  // Submarino (2)
-        '2': 'S',   // Submarino2 (2)
-        '3': 'C',  // Crucero (3)
-        '4': 'C',  // Crucero2 (3)
-        '5': 'A',  // Acorazado (4)
-        '6': 'P',  // Portaaviones (5)
-    };
-
-    // Mapeo de estados
-    const stateToChar = {
-        'hit': 'X',
-        'sunk': '#',
-        'near-hit': '~',
-        'miss': 'O',
-        'default': '.'
-    };
-
-    // Función para crear tabla ASCII
+  
+ 
     function createAsciiBoard(matrix, title) {
-        const horizontalLine = `┌───${'┬───'.repeat(matrix[0].length - 1)}┐\n`;
-        let boardStr = `${title}\n${horizontalLine}`;
-        
-        matrix.forEach((row, rowIndex) => {
-            boardStr += `│ ${row.join(' │ ')} │\n`;
-            boardStr += rowIndex === matrix.length - 1 
-                ? `└───${'┴───'.repeat(row.length - 1)}┘`
-                : `├───${'┼───'.repeat(row.length - 1)}┤\n`;
-        });
-        
-        return boardStr;
-    }
+      // Ancho fijo de celda: 4 caracteres (exactos)
+      const cellWidth = 4;
+      
+      // Líneas horizontales
+      const horizontalLine = `┌${'────'.repeat(matrix[0].length)}┐\n`;
+      const dividerLine = `├${'────'.repeat(matrix[0].length)}┤\n`;
+      const bottomLine = `└${'────'.repeat(matrix[0].length)}┘`;
+      
+      let boardStr = `${title}\n${horizontalLine}`;
+      
+      matrix.forEach((row, rowIndex) => {
+          let rowStr = '│';
+          row.forEach(cell => {
+              //.padEnd(cellWidth) rellena la celda con espacios hasta que tenga el tamaño de la celda
+              const paddedContent = String(cell).padEnd(cellWidth).substring(0, cellWidth);
+              rowStr += `${paddedContent}│`;
+          });
+          boardStr += `${rowStr}\n`;
+          
+          // Añadir divisor entre filas (excepto última)
+          if (rowIndex !== matrix.length - 1) {
+              boardStr += dividerLine;
+          }
+      });
+      
+      boardStr += bottomLine;
+      return boardStr;
+  }
 
     // Convertir tablero HTML a matriz
-    function boardToMatrix(boardElement) {
+    function boardToMatrix(boardElement, who) {
         const matrix = [];
         for (let row = 0; row < boardSize; row++) {
             const rowArray = [];
@@ -929,20 +935,34 @@ function attackPlayerCell(row, col) {
                     `.board-cell[data-row="${row}"][data-col="${col}"]`
                 );
                 
-                let char = '.';
+                let char = 'a';
                 
                 if (cell) {
                     if (cell.classList.contains('sunk')) {
-                        char = '#';
+                      if (who === "player") {
+                        char = 'p1-h';
+                      }
+                      else {
+                        char = 'p2-h'
+                      }
                     } else if (cell.classList.contains('hit')) {
-                        char = 'X';
+                      if (who === "player") {
+                        char = 'p1-h';
+                      }
+                      else {
+                        char = 'p2-h'
+                      }
                     } else if (cell.classList.contains('near-hit')) {
-                        char = '~';
+                        char = 'b';
                     } else if (cell.classList.contains('miss')) {
-                        char = 'O';
+                        char = 'b';
                     } else if (cell.classList.contains('occupied')) {
-                        const shipType = cell.dataset.ship;
-                        char = shipTypeToChar[shipType] || 'B';
+                        if (who === "player") {
+                          char = 'p1';
+                        }
+                        else {
+                          char = 'p2'
+                        }
                     }
                 }
                 
@@ -954,8 +974,8 @@ function attackPlayerCell(row, col) {
     }
 
     // Procesar ambos tableros
-    const playerMatrix = boardToMatrix(playerBoard);
-    const opponentMatrix = boardToMatrix(opponentBoard);
+    const playerMatrix = boardToMatrix(playerBoard, "player");
+    const opponentMatrix = boardToMatrix(opponentBoard, "opponent");
 
     // Crear contenido del archivo
     const textContent = `
@@ -977,15 +997,12 @@ ${createAsciiBoard(opponentMatrix, "FLOTA ENEMIGA")}
 ╔══════════════════════════════╗
 ║          LEYENDA             ║
 ╠══════════════════════════════╣
-║ P → Portaaviones (5 casillas)║
-║ A → Acorazado (4 casillas)   ║
-║ C → Crucero (3 casillas)     ║
-║ S → Submarino (2 casillas)   ║
-║ X → Impacto                  ║
-║ # → Hundido                  ║
-║ ~ → Disparo cercano          ║
-║ O → Agua                     ║
-║ . → Casilla vacía            ║
+║ p1 → Barco jugador           ║
+║ p2 → Barco maquina           ║
+║ p1-h → Barco jugador herido  ║
+║ p2-h → Barco máquina herida  ║
+║ a → Agua                     ║
+║ b → Disparo fallido          ║
 ╚══════════════════════════════╝
 
 ESTADÍSTICAS:
