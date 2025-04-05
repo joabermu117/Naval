@@ -553,6 +553,7 @@ function attackPlayerCell(row, col) {
 
         // Mostrar pantalla de victoria
         setTimeout(() => showVictoryScreen(winner), 1500);
+        sendGameStatsToBackend(winner)
     }
 }
 
@@ -876,7 +877,9 @@ function attackPlayerCell(row, col) {
     }
 
     if (exportMaps){
-      exportMaps
+      exportMaps.addEventListener("click", function (e) {
+        exportBoards()
+      });
     }
 
     document
@@ -906,7 +909,7 @@ function attackPlayerCell(row, col) {
       matrix.forEach((row, rowIndex) => {
           let rowStr = '│';
           row.forEach(cell => {
-              // Asegurar 4 caracteres exactos (relleno con espacios si es necesario)
+              //.padEnd(cellWidth) rellena la celda con espacios hasta que tenga el tamaño de la celda
               const paddedContent = String(cell).padEnd(cellWidth).substring(0, cellWidth);
               rowStr += `${paddedContent}│`;
           });
