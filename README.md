@@ -65,10 +65,10 @@ Naval/ ├── backend/ │ ├── app.py # API en Flask para gestionar pun
     "liveServer.settings.wait": 1000000,
     "liveServer.settings.reload": false,
     "liveServer.settings.ignoreFiles": [
-    "/.html",
-    "/.css",
-    "/*.js"
-],
+        "/.html",
+        "/.css",
+        "/*.js"
+    ]
 }
 
    ```
