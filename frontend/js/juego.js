@@ -308,7 +308,6 @@ const countryCodes = ['us', 'gb', 'ca', 'au', 'br', 'fr', 'de', 'es', 'it', 'jp'
     // Pequeño delay para mejor experiencia de usuario
     setTimeout(() => {
       opponentTurn();
-      checkGameEnd();
     }, 1000);
   }
 
@@ -492,7 +491,6 @@ function attackPlayerCell(row, col) {
   updateStatsDisplay();
   
   // Verificar si la IA ganó
-  checkGameEnd();
 }
 
   // Obtener nombre del barco
@@ -642,6 +640,8 @@ function showVictoryScreen(winner) {
 
   document.body.appendChild(victoryOverlay);
 
+  
+
   victoryOverlay.addEventListener("click", function (e) {
     if (e.target.id === "showStatsBtn") {
       window.StatsModal.open();
@@ -665,10 +665,11 @@ function showVictoryScreen(winner) {
     const nickName = player.nick_name || "Anónimo";
     const countryCode = player.country_code || "XX";
 
-    const score =
-      gameStats.player.hits * 10 -
-      gameStats.player.nearHits * 3 -
-      gameStats.player.misses * 1;
+    const score = gameStats.player.hits * 10 - 
+                gameStats.player.nearHits * 3 - 
+                gameStats.player.misses * 1;
+
+    console.log("Puntaje:", score);
 
     const postData = {
       nick_name: nickName,
@@ -764,8 +765,6 @@ function showVictoryScreen(winner) {
 
 
   function exportBoards() {
-  
- 
     function createAsciiBoard(matrix, title) {
       // Ancho fijo de celda: 4 caracteres (exactos)
       const cellWidth = 4;
