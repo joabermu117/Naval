@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const exportMaps = document.getElementById("exportMaps")
   const player = getPlayerData() || "Anónimo";
   const BACKEND_URL = "http://localhost:5000";
-
+  let statsSent = false; // Nueva bandera para evitar duplicados
   //Nombres de oponentes aleatorios
   const opponentNames = [
     "Jack Sparrow",
@@ -551,29 +551,31 @@ function checkGameEnd() {
   const opponentWins = areAllShipsSunk("player");
 
   if (playerWins || opponentWins) {
-    gamePhase = "game-over";
-    const winner = playerWins ? "player" : "opponent";
-    
-    // Deshabilitar interacciones
-    opponentBoard.querySelectorAll(".board-cell").forEach(cell => {
-      cell.style.pointerEvents = "none";
-    });
+      gamePhase = "game-over";
+      const winner = playerWins ? "player" : "opponent";
 
-    // Mensaje final
-    addGameMessage(playerWins 
-      ? "¡Felicidades! Has hundido los 6 barcos enemigos." 
-      : "¡Derrota! El oponente hundió tus 6 barcos.", 
-    true);
+      // Deshabilitar interacciones
+      opponentBoard.querySelectorAll(".board-cell").forEach(cell => {
+          cell.style.pointerEvents = "none";
+      });
 
-    // Mostrar pantalla de victoria
-    setTimeout(() => showVictoryScreen(winner), 1500);
-    
-    // Actualizar estadísticas finales antes de enviar
-    updateFinalStats(winner);
-    sendGameStatsToBackend(winner);
+      // Mensaje final
+      addGameMessage(playerWins 
+          ? "¡Felicidades! Has hundido los 6 barcos enemigos." 
+          : "¡Derrota! El oponente hundió tus 6 barcos.", 
+      true);
+
+      // Mostrar pantalla de victoria
+      setTimeout(() => showVictoryScreen(winner), 1500);
+
+      // Enviar estadísticas solo si no se han enviado
+      if (!statsSent) {
+          statsSent = true; // Marcar como enviadas
+          updateFinalStats(winner);
+          sendGameStatsToBackend(winner);
+      }
   }
 }
-
 function updateFinalStats() {
   // Calcular tiempo de juego
   const gameDuration = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -737,17 +739,20 @@ function showVictoryScreen(winner) {
 
     if (surrenderBtn) {
       surrenderBtn.addEventListener("click", function (e) {
-        if (confirm("¿Estás seguro de que quieres rendirte?")) {
-          addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
-          gamePhase = "game-over";
-
-          sendGameStatsToBackend("opponent").then(() => {
-            showVictoryScreen("opponent");
-          });
-        }
+          if (confirm("¿Estás seguro de que quieres rendirte?")) {
+              addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
+              gamePhase = "game-over";
+  
+              // Enviar estadísticas solo si no se han enviado
+              if (!statsSent) {
+                  statsSent = true; // Marcar como enviadas
+                  sendGameStatsToBackend("opponent").then(() => {
+                      showVictoryScreen("opponent");
+                  });
+              }
+          }
       });
-    }
-
+  }
     if (exportMaps){
       exportMaps.addEventListener("click", function (e) {
         exportBoards()
