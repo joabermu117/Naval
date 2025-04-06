@@ -255,7 +255,8 @@ const countryCodes = ['us', 'gb', 'ca', 'au', 'br', 'fr', 'de', 'es', 'it', 'jp'
     if (
       cell.classList.contains("miss") ||
       cell.classList.contains("hit") ||
-      cell.classList.contains("sunk")
+      cell.classList.contains("sunk") ||
+      cell.classList.contains("near-hit")
     ) {
       addGameMessage(
         "Ya has disparado aquí. No puedes volver a atacar esta celda."
@@ -283,6 +284,7 @@ const countryCodes = ['us', 'gb', 'ca', 'au', 'br', 'fr', 'de', 'es', 'it', 'jp'
         addGameMessage("¡Impacto! Has golpeado un barco.");
       }
       gameStats.player.hits++;
+      return;
     }
     // Verificar si el disparo estuvo cerca de un barco
     else if (isNearShip(row, col, "opponent")) {
@@ -402,10 +404,8 @@ const countryCodes = ['us', 'gb', 'ca', 'au', 'br', 'fr', 'de', 'es', 'it', 'jp'
 // Turno de la IA (oponente)
 function opponentTurn() {
   if (gamePhase !== "opponent-turn") return;
-  
-  // Pequeño delay para simular "pensamiento"
+
   setTimeout(() => {
-      // Seleccionar una celda aleatoria que no haya sido atacada antes
       let row, col;
       let attempts = 0;
       const maxAttempts = boardSize * boardSize;
@@ -416,7 +416,6 @@ function opponentTurn() {
           attempts++;
           
           if (attempts > maxAttempts) {
-              // Por si acaso no encuentra celda válida (no debería pasar)
               addGameMessage("La IA no encontró celdas válidas para atacar");
               gamePhase = "player-turn";
               return;
@@ -426,7 +425,6 @@ function opponentTurn() {
               `.board-cell[data-row="${row}"][data-col="${col}"]`
           );
           
-          // Si la celda no ha sido atacada, salir del bucle
           if (cell && !cell.classList.contains("hit") && 
               !cell.classList.contains("miss") && 
               !cell.classList.contains("sunk")) {
@@ -434,25 +432,30 @@ function opponentTurn() {
           }
       } while (true);
       
-      // Realizar el ataque
-      attackPlayerCell(row, col);
+      // Realizar el ataque y verificar si debe continuar
+      const shouldContinueTurn = attackPlayerCell(row, col);
       
-      // Cambiar de turno después de un breve delay
-      setTimeout(() => {
-          gamePhase = "player-turn";
-          addGameMessage("¡Tu turno!");
-      }, 8);
-  }, 10);
+      // Cambiar de turno solo si no hubo impacto
+      if (!shouldContinueTurn) {
+          setTimeout(() => {
+              gamePhase = "player-turn";
+              addGameMessage("¡Tu turno!");
+          }, 800);
+      } else {
+          // Si hubo impacto, la IA sigue jugando
+          setTimeout(opponentTurn, 800);
+      }
+  }, 500);
 }
 
 // Función para que la IA ataque una celda del jugador
 function attackPlayerCell(row, col) {
   const cell = playerBoard.querySelector(
-      `.board-cell[data-row="${row}"][data-col="${col}"]`
+    `.board-cell[data-row="${row}"][data-col="${col}"]`
   );
   
-  if (!cell) return;
-  
+  if (!cell) return false;
+
   // Verificar si hay un barco en esta celda
   if (playerBoardState[row][col] !== 0) {
       // Impacto en barco
@@ -471,6 +474,7 @@ function attackPlayerCell(row, col) {
           addGameMessage("La IA ha golpeado uno de tus barcos.");
       }
       gameStats.opponent.hits++;
+      return true; // Indica que la IA debe seguir jugando
   } 
   // Verificar si el disparo estuvo cerca de un barco
   else if (isNearShip(row, col, "player")) {
@@ -489,9 +493,9 @@ function attackPlayerCell(row, col) {
   
   // Actualizar estadísticas visuales
   updateStatsDisplay();
-  
-  // Verificar si la IA ganó
+  return false; // Indica que el turno debe cambiar
 }
+
 
   // Obtener nombre del barco
   function getShipName(shipId) {
