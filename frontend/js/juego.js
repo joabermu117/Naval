@@ -572,8 +572,7 @@ function updateFinalStats() {
   // Calcular puntaje
   const score = gameStats.player.hits * 10 - 
                 gameStats.player.nearHits * 3 - 
-                gameStats.player.misses * 1 + 
-                gameStats.player.shipsSunk * 15;
+                gameStats.player.misses * 1;
 
   // Actualizar el modal de estadísticas
   window.StatsModal.updateStats({

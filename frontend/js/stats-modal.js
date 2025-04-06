@@ -82,6 +82,17 @@ class StatsModal {
     }
     
     updateUI() {
+
+      const contryElement = document.getElementById("statsPlayerCountryFlag");
+      if (contryElement) {
+        contryElement.innerHTML = `
+          <img src="https://flagsapi.com/${this.statsData.gameInfo.playerCountry}/flat/24.png"
+                alt="${this.statsData.gameInfo.playerCountry}"
+                onerror="this.style.display='none'">
+        `;
+      }
+
+
       // Actualizar estadísticas del jugador
       document.getElementById("statsPlayerName").textContent = this.statsData.gameInfo.playerName;
       document.getElementById("statsPlayerCountry").textContent = this.statsData.gameInfo.playerCountry;
