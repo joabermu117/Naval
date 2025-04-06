@@ -1,2 +1,0 @@
-# Naval
-Batalla Naval
