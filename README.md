@@ -59,8 +59,8 @@ Naval/ ├── backend/ │ ├── app.py # API en Flask para gestionar pun
 1. Abre la carpeta `frontend` en un servidor local. Si usas Visual Studio Code, puedes usar la extensión **Live Server**.
 2. Configura el archivo settings.json en `.vscode/settings.json` para evitar errores del liveServer:
    ```json
-{
-    "workbench.colorTheme": "Default Dark+",
+
+    {"workbench.colorTheme": "Default Dark+",
     "gitlens.views.commitDetails.files.layout": "tree",
     "liveServer.settings.wait": 1000000,
     "liveServer.settings.reload": false,
@@ -68,8 +68,7 @@ Naval/ ├── backend/ │ ├── app.py # API en Flask para gestionar pun
         "/.html",
         "/.css",
         "/*.js"
-    ]
-}
+    ]}
 
    ```
 3. Accede al frontend desde tu navegador en `http://127.0.0.1:5501/frontend/html/index.html`.
