@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const exportMaps = document.getElementById("exportMaps")
   const player = getPlayerData() || "Anónimo";
   const BACKEND_URL = "http://localhost:5000";
-  let statsSent = false; // Nueva bandera para evitar duplicados
+
   //Nombres de oponentes aleatorios
   const opponentNames = [
     "Jack Sparrow",
@@ -568,12 +568,9 @@ function checkGameEnd() {
       // Mostrar pantalla de victoria
       setTimeout(() => showVictoryScreen(winner), 1500);
 
-      // Enviar estadísticas solo si no se han enviado
-      if (!statsSent) {
-          statsSent = true; // Marcar como enviadas
+
           updateFinalStats(winner);
           sendGameStatsToBackend(winner);
-      }
   }
 }
 function updateFinalStats() {
@@ -742,14 +739,10 @@ function showVictoryScreen(winner) {
           if (confirm("¿Estás seguro de que quieres rendirte?")) {
               addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
               gamePhase = "game-over";
-  
-              // Enviar estadísticas solo si no se han enviado
-              if (!statsSent) {
-                  statsSent = true; // Marcar como enviadas
-                  sendGameStatsToBackend("opponent").then(() => {
+                  sendGameStatsToBackend("player").then(() => {
                       showVictoryScreen("opponent");
                   });
-              }
+  
           }
       });
   }
@@ -860,9 +853,6 @@ function showVictoryScreen(winner) {
 ║ Jugador: ${player.nick_name || "Anónimo"}
 ║ Fecha: ${new Date().toLocaleString()}
 ║ Ubicación: ${gameLocation?.name || "Desconocida"}
-║ Resultado: ${gamePhase === "game-over" 
-    ? (areAllShipsSunk("opponent") ? "VICTORIA" : "Derrota") 
-    : "En progreso"}
 ╚══════════════════════════════╝
 
 ${createAsciiBoard(playerMatrix, "TU FLOTA")}
@@ -920,6 +910,7 @@ function createOpponent() {
   flagImg.src = `https://flagcdn.com/w20/${randomCountryCode}.png`;
   flagImg.alt = `Bandera ${randomCountryCode}`;
 }
+
   // Iniciar el juego
   initGame();
   setupEventListeners();
