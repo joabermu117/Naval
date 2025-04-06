@@ -16,6 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const player = getPlayerData() || "Anónimo";
   const BACKEND_URL = "http://localhost:5000";
 
+  //Nombres de oponentes aleatorios
+  const opponentNames = [
+    "Jack Sparrow",
+    "Capitán Nemo",
+    "Calico Jack",
+    "Destructor",
+    "Barba Negra",
+    "William Kidd",
+  ];
+  // Lista de códigos de país válidos (ejemplo)
+const countryCodes = ['us', 'gb', 'ca', 'au', 'br', 'fr', 'de', 'es', 'it', 'jp', 'cn', 'in', 'mx'];
 
   // Variables de estado del juego
   let boardSize = 10;
@@ -75,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
       displayWeatherInfo();
 
       displayPlayerInfo("playerInfoContainer");
+
+      createOpponent();
 
       // Comenzar juego
       gamePhase = "player-turn";
@@ -888,7 +901,22 @@ ESTADÍSTICAS:
     }, 100);
 }
 
-  // Configurar el botón de ranking
+//Crear oponentes aleatorios, con bandera y nombre aleatoria
+function createOpponent() {
+  const randomNameIndex = Math.floor(Math.random() * opponentNames.length);
+  const randomName = opponentNames[randomNameIndex];
+  
+  const randomCountryIndex = Math.floor(Math.random() * countryCodes.length);
+  const randomCountryCode = countryCodes[randomCountryIndex];
+  
+  // Actualizar el texto
+  document.querySelector("#opponentInfo span").textContent = `${randomName}`;
+  
+  // Actualizar la bandera
+  const flagImg = document.getElementById("opponentFlag");
+  flagImg.src = `https://flagcdn.com/w20/${randomCountryCode}.png`;
+  flagImg.alt = `Bandera ${randomCountryCode}`;
+}
   // Iniciar el juego
   initGame();
   setupEventListeners();
