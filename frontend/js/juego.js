@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
   // Mostrar información meteorológica
   function displayWeatherInfo() {
     if (!weatherData || !gameLocation) {
@@ -428,8 +429,8 @@ function opponentTurn() {
       setTimeout(() => {
           gamePhase = "player-turn";
           addGameMessage("¡Tu turno!");
-      }, 800);
-  }, 1000);
+      }, 8);
+  }, 10);
 }
 
 // Función para que la IA ataque una celda del jugador
