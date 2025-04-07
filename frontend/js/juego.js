@@ -755,10 +755,10 @@ function addGameMessage(message, isImportant = false) {
           if (confirm("¿Estás seguro de que quieres rendirte?")) {
               addGameMessage("Te has rendido. ¡Mejor suerte la próxima vez!", true);
               gamePhase = "game-over";
+              updateFinalStats("player");
                   sendGameStatsToBackend("player").then(() => {
                       showVictoryScreen("opponent");
                   });
-  
           }
       });
   }
