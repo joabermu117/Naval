@@ -1,5 +1,8 @@
 body {
-    background: linear-gradient(135deg, #1a2980, #26d0ce);
+    background-image: url('https://store-images.s-microsoft.com/image/apps.43299.13750259813446871.c5e9bc47-2646-44ec-b33b-dbaca48e51a1.e3d68a6d-6cd5-4ba8-8787-d9687739de48?mode=scale&q=90&h=1080&w=1920');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: white;
 }
 
