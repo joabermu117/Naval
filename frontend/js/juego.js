@@ -705,16 +705,28 @@ function showVictoryScreen(winner) {
   }
 
   // Añadir mensaje al historial del juego
-  function addGameMessage(message, isImportant = false) {
-    const messageElement = document.createElement("p");
-    messageElement.textContent = message;
-    if (isImportant) {
-      messageElement.classList.add("fw-bold");
-    }
 
-    gameMessages.appendChild(messageElement);
-    gameMessages.scrollTop = gameMessages.scrollHeight;
+function addGameMessage(message, isImportant = false) {
+  // Limitar a 100 mensajes (elimina los más antiguos si hay más)
+  const maxMessages = 400;
+  const currentMessages = gameMessages.querySelectorAll("p");
+  
+  if (currentMessages.length >= maxMessages) {
+      gameMessages.removeChild(currentMessages[0]);
   }
+  
+  // Crear el elemento del mensaje
+  const messageElement = document.createElement("p");
+  const messageCount = gameMessages.querySelectorAll("p").length + 1;
+  messageElement.innerHTML = `<span class="message-counter">${messageCount}.</span> ${message}`;
+  
+  if (isImportant) {
+      messageElement.classList.add("fw-bold", "text-primary");
+  }
+
+  gameMessages.appendChild(messageElement);
+  gameMessages.scrollTop = gameMessages.scrollHeight;
+}
 
   // Configurar event listeners
   // Mejora en la configuración de eventos iniciales

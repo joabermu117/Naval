@@ -231,3 +231,9 @@
 .btn-info {
     background-color: white;
 }
+
+.message-counter {
+    color: #6c757d;
+    font-weight: bold;
+    margin-right: 5px;
+}
